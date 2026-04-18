@@ -29,6 +29,18 @@ function _buildCard(msg) {
     replyHtml = `<div class="reply-quote">&gt; ${_esc(msg.reply_to_content)}</div>`;
   }
 
+  // T067: attachment rendering
+  let attachHtml = '';
+  if (msg.attachment) {
+    const att = msg.attachment;
+    if (att.mime_type && att.mime_type.startsWith('image/')) {
+      attachHtml = `<div class="msg-attachment"><img src="${att.url}" class="msg-attachment-img" alt="${_esc(att.original_filename)}" loading="lazy"/></div>`;
+    } else {
+      const kb = Math.round((att.size_bytes || 0) / 1024);
+      attachHtml = `<div class="msg-attachment"><a href="${att.url}" download="${_esc(att.original_filename)}" class="msg-attachment-link">📎 ${_esc(att.original_filename)} (${kb} KB)</a></div>`;
+    }
+  }
+
   const editedBadge = msg.is_edited ? '<span class="edited-badge">[edited]</span>' : '';
   const actions = isOwn
     ? `<span class="msg-actions">
@@ -45,6 +57,7 @@ function _buildCard(msg) {
     <span class="who">${_esc(msg.sender_username)}</span>
     <span class="msg-content">${_esc(msg.content)}</span>
     ${editedBadge}
+    ${attachHtml}
     ${actions}
   `;
 
@@ -79,6 +92,10 @@ export function init({ currentUserId, onLoadMore, onEdit, onDelete }) {
       .chat-msg:hover .msg-actions { opacity: 1; }
       .msg-action-btn { background: none; border: 1px solid #808080; cursor: pointer; font-size: 11px; padding: 0 4px; margin-left: 2px; }
       .msg-action-btn:hover { background: #000080; color: #fff; border-color: #000080; }
+      .msg-attachment { margin-top: 4px; }
+      .msg-attachment-img { max-width: 320px; max-height: 240px; display: block; box-shadow: inset 2px 2px 0 #808080, inset -2px -2px 0 #fff; cursor: pointer; }
+      .msg-attachment-link { color: #000080; text-decoration: none; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+      .msg-attachment-link:hover { text-decoration: underline; }
     `;
     document.head.appendChild(style);
   }

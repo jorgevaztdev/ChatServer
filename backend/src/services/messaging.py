@@ -10,7 +10,7 @@ from src.services.websocket_hub import hub
 MAX_CONTENT_BYTES = 3072
 
 
-def build_payload(msg: Message, sender_username: str, reply_to_content: str | None = None) -> dict:
+def build_payload(msg: Message, sender_username: str, reply_to_content: str | None = None, attachment: dict | None = None) -> dict:
     return {
         "id": msg.id,
         "room_id": msg.room_id,
@@ -22,6 +22,7 @@ def build_payload(msg: Message, sender_username: str, reply_to_content: str | No
         "is_edited": msg.is_edited,
         "created_at": msg.created_at.isoformat(),
         "updated_at": msg.updated_at.isoformat(),
+        "attachment": attachment,
     }
 
 

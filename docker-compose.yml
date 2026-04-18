@@ -3,6 +3,8 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
+      - "5222:5222"
+      - "5269:5269"
     volumes:
       - sqlite_data:/data
       - media_data:/media
@@ -11,6 +13,25 @@ services:
       - MEDIA_DIR=/media
       - JWT_SECRET=changeme-in-production
       - JWT_ALGORITHM=HS256
+      - XMPP_DOMAIN=host-a.chat.local
+      - XMPP_S2S_PEERS=host-b.chat.local:5270
+
+  backend_b:
+    build: ./backend
+    ports:
+      - "8001:8000"
+      - "5223:5222"
+      - "5270:5269"
+    volumes:
+      - sqlite_data_b:/data
+      - media_data_b:/media
+    environment:
+      - DATABASE_URL=sqlite:////data/chat.db
+      - MEDIA_DIR=/media
+      - JWT_SECRET=changeme-in-production
+      - JWT_ALGORITHM=HS256
+      - XMPP_DOMAIN=host-b.chat.local
+      - XMPP_S2S_PEERS=host-a.chat.local:5269
 
   frontend:
     build: ./frontend
@@ -22,3 +43,5 @@ services:
 volumes:
   sqlite_data:
   media_data:
+  sqlite_data_b:
+  media_data_b:

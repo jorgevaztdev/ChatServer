@@ -22,6 +22,8 @@ async def on_startup() -> None:
     init_db()
     from src.services.presence import run_afk_checker
     asyncio.create_task(run_afk_checker())
+    from src.services.jabber_server import start_jabber_server
+    asyncio.create_task(start_jabber_server())
 
 
 @app.get("/health")

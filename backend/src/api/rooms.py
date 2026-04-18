@@ -265,6 +265,41 @@ def list_members(
     ]
 
 
+# ── T050: Delete room (owner only) ───────────────────────────────────────────
+
+@router.delete("/rooms/{room_id}", status_code=204)
+async def delete_room(
+    room_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    import os
+    from src.models.message import Message
+    from src.models.attachment import Attachment
+
+    room = _get_room_or_404(room_id, db)
+    if room.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Owner only")
+
+    # Delete physical files for all attachments in this room
+    msgs = db.query(Message).filter(Message.room_id == room_id).all()
+    for msg in msgs:
+        att = db.query(Attachment).filter(Attachment.message_id == msg.id).first()
+        if att:
+            try:
+                os.remove(att.stored_path)
+            except OSError:
+                pass
+
+    # Cascade: SQLAlchemy ondelete="CASCADE" handles DB rows, but we need the room row
+    # which will cascade to memberships, bans, messages, attachments via FK constraints.
+    db.delete(room)
+    db.commit()
+
+    from src.services.websocket_hub import hub
+    await hub.broadcast_room(room_id, {"type": "room:deleted", "payload": {"room_id": room_id}})
+
+
 # ── GET /rooms/{id} — room detail ─────────────────────────────────────────────
 
 @router.get("/rooms/{room_id}")
