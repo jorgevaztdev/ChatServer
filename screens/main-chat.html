@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Neo-Nostalgia Chat - Main Chat</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#17cfcf",
+          "background-light": "#f6f8f8",
+          "background-dark": "#112121",
+          "os-surface": "#DFDFDF",
+          "os-text": "#0D0D0D",
+          "os-accent": "#000080",
+          "os-muted": "#808080",
+        },
+        fontFamily: {
+          "display": ["Inter", "sans-serif"],
+          "mono": ["'JetBrains Mono'", "monospace"],
+        },
+        borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem", "sm": "0.125rem"},
+      },
+    },
+  }
+</script>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden; /* Strict unscrollable body */
+    background-color: #005050; /* Brand background fallback */
+    font-family: 'Inter', sans-serif;
+    color: #0D0D0D;
+  }
+  
+  /* Bevel utilities for retro feel merged with modern tailwind */
+  .bevel-out {
+    box-shadow: inset 2px 2px 0px 0px #FFFFFF, inset -2px -2px 0px 0px #808080;
+  }
+  .bevel-in {
+    box-shadow: inset 2px 2px 0px 0px #808080, inset -2px -2px 0px 0px #FFFFFF;
+  }
+  
+  /* Tree view styling */
+  .tree-line-v {
+    position: absolute;
+    left: -12px;
+    top: -8px;
+    bottom: 0;
+    width: 1px;
+    border-left: 1px dotted #808080;
+  }
+  .tree-line-h {
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    width: 8px;
+    height: 1px;
+    border-top: 1px dotted #808080;
+  }
+  .last-child .tree-line-v {
+    bottom: 50%;
+  }
+
+  /* Custom Scrollbar for inner panes */
+  ::-webkit-scrollbar {
+    width: 12px;
+    background: #DFDFDF;
+    border-left: 1px solid #808080;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #DFDFDF;
+    box-shadow: inset 2px 2px 0px 0px #FFFFFF, inset -2px -2px 0px 0px #808080;
+  }
+  ::-webkit-scrollbar-button {
+    display: block;
+    height: 12px;
+    background: #DFDFDF;
+    box-shadow: inset 2px 2px 0px 0px #FFFFFF, inset -2px -2px 0px 0px #808080;
+  }
+</style>
+</head>
+<body class="flex flex-col h-screen w-screen bg-os-surface text-os-text">
+<!-- Main Window Frame (Simulated Window) -->
+<div class="flex flex-col flex-1 overflow-hidden m-2 bevel-out bg-os-surface">
+<!-- Title Bar -->
+<div class="h-6 bg-os-accent text-white flex items-center justify-between px-2 font-bold text-sm shrink-0">
+<span>Neo-Nostalgia Chat v2.4</span>
+<div class="flex gap-1">
+<button class="w-4 h-4 bg-os-surface bevel-out flex items-center justify-center text-black text-xs">_</button>
+<button class="w-4 h-4 bg-os-surface bevel-out flex items-center justify-center text-black text-xs">□</button>
+<button class="w-4 h-4 bg-os-surface bevel-out flex items-center justify-center text-black text-xs font-bold">X</button>
+</div>
+</div>
+<!-- 3-Column Content Area -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Left Column: Server/Room List -->
+<div class="w-[200px] shrink-0 border-r-2 border-os-muted bg-background-light flex flex-col p-2 overflow-y-auto">
+<div class="text-xs font-bold mb-2 text-os-muted uppercase">Servers &amp; Rooms</div>
+<ul class="text-sm pl-4 relative">
+<li class="relative mb-1 group cursor-pointer">
+<span class="flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined text-sm">folder</span> General
+            </span>
+<ul class="pl-4 relative mt-1">
+<div class="tree-line-v"></div>
+<li class="relative py-[2px] px-1 hover:bg-os-surface rounded-sm cursor-pointer active:bg-primary active:text-white flex items-center group">
+<div class="tree-line-h"></div>
+<span class="text-os-muted mr-1 font-mono">#</span> announcements
+              </li>
+<li class="relative py-[2px] px-1 bg-os-accent text-white rounded-sm cursor-pointer flex items-center group">
+<div class="tree-line-h"></div>
+<span class="text-white/70 mr-1 font-mono">#</span> dev-chat
+              </li>
+<li class="relative py-[2px] px-1 hover:bg-os-surface rounded-sm cursor-pointer active:bg-primary active:text-white flex items-center group last-child">
+<div class="tree-line-h"></div>
+<span class="text-os-muted mr-1 font-mono">#</span> random
+              </li>
+</ul>
+</li>
+<li class="relative mt-2 mb-1 group cursor-pointer">
+<span class="flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined text-sm">folder</span> Projects
+            </span>
+<ul class="pl-4 relative mt-1">
+<div class="tree-line-v"></div>
+<li class="relative py-[2px] px-1 hover:bg-os-surface rounded-sm cursor-pointer active:bg-primary active:text-white flex items-center group">
+<div class="tree-line-h"></div>
+<span class="text-os-muted mr-1 font-mono">#</span> ui-redesign
+              </li>
+<li class="relative py-[2px] px-1 hover:bg-os-surface rounded-sm cursor-pointer active:bg-primary active:text-white flex items-center group last-child">
+<div class="tree-line-h"></div>
+<span class="text-os-muted mr-1 font-mono">#</span> backend-v2
+              </li>
+</ul>
+</li>
+</ul>
+</div>
+<!-- Center Column: Chat Feed -->
+<div class="flex-1 flex flex-col bg-white overflow-hidden relative">
+<!-- Chat History -->
+<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-1 text-sm">
+<!-- System Message -->
+<div class="text-center my-4 font-mono text-os-muted text-xs border-b border-dashed border-os-muted pb-2">
+            *** JOINED ROOM #dev-chat ***
+          </div>
+<!-- Strict Inline Messages -->
+<div class="hover:bg-background-light py-0.5 px-1 rounded-sm flex items-start gap-2 group">
+<span class="font-mono text-xs text-os-muted shrink-0 pt-[2px]">[14:30]</span>
+<span class="font-bold text-os-text shrink-0">&lt;Admin_Sara&gt;</span>
+<span class="text-os-text break-words">Deployment looks stable on staging. Ready for prod?</span>
+</div>
+<div class="hover:bg-background-light py-0.5 px-1 rounded-sm flex items-start gap-2 group">
+<span class="font-mono text-xs text-os-muted shrink-0 pt-[2px]">[14:32]</span>
+<span class="font-bold text-os-accent shrink-0">&lt;Dev_Mike&gt;</span>
+<span class="text-os-text break-words">Give me 5 mins, I need to check the database migration logs first.</span>
+</div>
+<div class="hover:bg-background-light py-0.5 px-1 rounded-sm flex items-start gap-2 group">
+<span class="font-mono text-xs text-os-muted shrink-0 pt-[2px]">[14:35]</span>
+<span class="font-bold text-primary shrink-0">&lt;You&gt;</span>
+<span class="text-os-text break-words">Logs look clean from my end. No errors on the auth service.</span>
+</div>
+</div>
+<!-- Input Area (Fixed Bottom) -->
+<div class="h-[64px] shrink-0 bg-os-surface border-t-2 border-os-muted flex items-center px-4 py-2 gap-2 bevel-out">
+<label class="flex-1 h-full flex items-center bg-white bevel-in relative group/input">
+<span class="font-mono text-os-muted pl-2 select-none">&gt;</span>
+<input autofocus="" class="w-full h-full bg-transparent border-none focus:ring-0 text-sm font-mono px-2 placeholder:text-os-muted" placeholder="Send message to #dev-chat..." type="text"/>
+<div class="absolute inset-0 border border-transparent group-focus-within/input:border-primary group-focus-within/input:border-dotted pointer-events-none"></div>
+</label>
+</div>
+</div>
+<!-- Right Column: User List -->
+<div class="w-[200px] shrink-0 border-l-2 border-os-muted bg-background-light flex flex-col p-2 overflow-y-auto">
+<!-- Admins -->
+<div class="mb-4">
+<div class="text-xs font-bold mb-2 text-os-muted uppercase">Admin (1)</div>
+<div class="flex items-center gap-2 text-sm py-1 px-1 hover:bg-os-surface rounded-sm cursor-pointer">
+<div class="w-2.5 h-2.5 bg-primary border border-black shrink-0"></div>
+<span class="font-bold truncate">Admin_Sara</span>
+</div>
+</div>
+<!-- Online -->
+<div class="mb-4">
+<div class="text-xs font-bold mb-2 text-os-muted uppercase">Online (3)</div>
+<div class="flex items-center gap-2 text-sm py-1 px-1 hover:bg-os-surface rounded-sm cursor-pointer">
+<div class="w-2.5 h-2.5 bg-primary border border-black shrink-0"></div>
+<span class="truncate">Dev_Mike</span>
+</div>
+<div class="flex items-center gap-2 text-sm py-1 px-1 hover:bg-os-surface rounded-sm cursor-pointer bg-white border border-dashed border-os-muted">
+<div class="w-2.5 h-2.5 bg-primary border border-black shrink-0"></div>
+<span class="truncate font-bold text-primary">You</span>
+</div>
+<div class="flex items-center gap-2 text-sm py-1 px-1 hover:bg-os-surface rounded-sm cursor-pointer">
+<div class="w-2.5 h-2.5 bg-yellow-400 border border-black shrink-0"></div>
+<span class="truncate">Design_Alex</span>
+</div>
+</div>
+<!-- Offline -->
+<div>
+<div class="text-xs font-bold mb-2 text-os-muted uppercase">Offline (2)</div>
+<div class="flex items-center gap-2 text-sm py-1 px-1 hover:bg-os-surface rounded-sm cursor-pointer text-os-muted">
+<div class="w-2.5 h-2.5 bg-os-surface border border-os-muted shrink-0"></div>
+<span class="truncate">QA_Bot</span>
+</div>
+<div class="flex items-center gap-2 text-sm py-1 px-1 hover:bg-os-surface rounded-sm cursor-pointer text-os-muted">
+<div class="w-2.5 h-2.5 bg-os-surface border border-os-muted shrink-0"></div>
+<span class="truncate">Sys_Log</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Global Status Bar -->
+<div class="h-6 shrink-0 bg-os-surface bevel-out flex items-center px-2 text-xs font-mono justify-between text-os-muted">
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Connected</span>
+<span class="border-l border-os-muted pl-4">Room: #dev-chat</span>
+</div>
+<div>
+        Ping: 24ms
+      </div>
+</div>
+</div>
+</body></html>

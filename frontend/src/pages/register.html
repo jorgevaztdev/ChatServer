@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Register - Neo-Nostalgia Chat</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#17cfcf",
+            "os-teal": "#008080",
+            "os-bg": "#005050",
+            "os-surface-solid": "#DFDFDF",
+            "os-text": "#0D0D0D",
+            "os-muted": "#808080",
+            "os-accent": "#000080",
+            "os-white": "#FFFFFF",
+            "os-black": "#000000",
+            "os-green": "#008000",
+            "os-error": "#cc0000"
+          },
+          fontFamily: {
+            "primary": ['"IBM Plex Sans"', "sans-serif"],
+            "mono": ['"JetBrains Mono"', "monospace"]
+          },
+          borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "none": "0px" }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bevel-out: inset 2px 2px 0px 0px #FFFFFF, inset -2px -2px 0px 0px #808080;
+      --bevel-in:  inset 2px 2px 0px 0px #808080, inset -2px -2px 0px 0px #FFFFFF;
+    }
+    body { font-family: 'IBM Plex Sans', sans-serif; background-color: #005050; color: #0D0D0D; }
+    .bevel-out { box-shadow: var(--bevel-out); }
+    .bevel-in  { box-shadow: var(--bevel-in);  }
+    .btn-os { box-shadow: var(--bevel-out); background-color: #DFDFDF; border: 1px solid #000; transition: none; }
+    .btn-os:active { box-shadow: var(--bevel-in); padding-top: 3px; padding-left: 3px; }
+    .btn-os:disabled { color: #808080; text-shadow: 1px 1px 0 #fff; }
+    .input-os { box-shadow: var(--bevel-in); background-color: #fff; border: none; border-radius: 0 !important; }
+    .input-os:focus { outline: 1px dotted #000; outline-offset: -2px; }
+    .tab-active   { background-color: #DFDFDF; box-shadow: inset 2px 2px 0 #fff, inset -2px 0 0 #808080; border-bottom: 2px solid #DFDFDF; z-index: 10; }
+    .tab-inactive { background-color: #C0C0C0; box-shadow: var(--bevel-out); margin-top: 4px; }
+    .segmented-bar-container { box-shadow: var(--bevel-in); background-color: #fff; height: 20px; padding: 2px; }
+    .segmented-bar-fill { height: 100%; background-color: #008000; width: 0%; transition: width 0.4s ease; background-image: linear-gradient(90deg, transparent 0%, transparent 90%, #fff 90%, #fff 100%); background-size: 20px 100%; }
+    .error-bar { font-family: 'JetBrains Mono', monospace; color: #cc0000; font-size: 11px; font-weight: bold; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-[450px] bg-[rgba(223,223,223,0.85)] backdrop-blur-[12px] bevel-out border border-black flex flex-col rounded-none">
+    <!-- Title Bar -->
+    <div class="bg-os-accent h-8 flex items-center justify-between px-2 text-white font-primary font-bold text-[14px] tracking-wide select-none">
+      <span>Register - Neo-Nostalgia Chat</span>
+      <button class="btn-os w-5 h-5 flex items-center justify-center text-os-text font-bold text-xs !border-none !p-0" onclick="window.location.href='login.html'">
+        <span class="material-symbols-outlined text-[16px] leading-none">close</span>
+      </button>
+    </div>
+
+    <div class="p-3 flex flex-col gap-4">
+      <!-- Tabs -->
+      <div class="flex gap-1 -mb-[18px] relative z-0">
+        <button class="tab-active px-3 py-1 text-[14px] font-primary font-medium text-os-text cursor-default relative">Account Info</button>
+        <button class="tab-inactive px-3 py-1 text-[14px] font-primary font-medium text-os-text cursor-not-allowed opacity-60">Avatar Selection</button>
+      </div>
+
+      <!-- Tab Content -->
+      <form id="register-form" class="bevel-out bg-os-surface-solid border border-black p-4 pt-6 flex flex-col gap-4 relative z-10 mt-4" onsubmit="handleRegister(event)">
+        <div class="flex flex-col gap-1">
+          <label class="font-primary text-[14px] font-medium text-os-text">Username</label>
+          <input class="input-os h-8 px-2 font-mono text-[14px] text-os-text w-full placeholder:text-os-muted" id="username" placeholder="Enter desired handle" type="text" required autocomplete="username"/>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-primary text-[14px] font-medium text-os-text">Email Address</label>
+          <input class="input-os h-8 px-2 font-mono text-[14px] text-os-text w-full placeholder:text-os-muted" id="email" placeholder="user@domain.com" type="email" required autocomplete="email"/>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="font-primary text-[14px] font-medium text-os-text">Password</label>
+          <input class="input-os h-8 px-2 font-mono text-[14px] text-os-text w-full placeholder:text-os-muted" id="password" placeholder="••••••••" type="password" required autocomplete="new-password"/>
+        </div>
+        <div id="error-msg" class="error-bar hidden"></div>
+      </form>
+
+      <div class="h-0.5 w-full bevel-in my-1"></div>
+
+      <!-- Footer -->
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-1">
+          <span id="progress-label" class="font-mono text-[12px] text-os-text">Ready to register...</span>
+          <div class="segmented-bar-container w-full">
+            <div class="segmented-bar-fill" id="progress-bar"></div>
+          </div>
+        </div>
+        <div class="flex justify-between items-center gap-2">
+          <a class="text-[12px] font-mono text-os-muted hover:text-os-text transition-colors" href="login.html">Already have an account?</a>
+          <div class="flex gap-2">
+            <button class="btn-os px-6 py-1.5 font-primary text-[14px] font-semibold text-os-text min-w-[80px]" type="button" onclick="window.location.href='login.html'">Cancel</button>
+            <button class="btn-os px-6 py-1.5 font-primary text-[14px] font-semibold text-os-text min-w-[80px]" id="submit-btn" type="submit" form="register-form">Next &gt;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function handleRegister(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      const errEl = document.getElementById('error-msg');
+      const progressBar = document.getElementById('progress-bar');
+      const progressLabel = document.getElementById('progress-label');
+
+      errEl.classList.add('hidden');
+      btn.disabled = true;
+      btn.textContent = 'Registering…';
+      progressLabel.textContent = 'Creating account...';
+      progressBar.style.width = '60%';
+
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.detail || 'Registration failed');
+
+        progressBar.style.width = '100%';
+        progressLabel.textContent = 'Account created! Redirecting...';
+        setTimeout(() => { window.location.href = 'login.html'; }, 800);
+      } catch (err) {
+        errEl.textContent = 'ERR: ' + err.message;
+        errEl.classList.remove('hidden');
+        progressBar.style.width = '0%';
+        progressLabel.textContent = 'Ready to register...';
+        btn.textContent = 'Next >';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contacts — Neo-Nostalgia Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --os-gray:    #DFDFDF;
+      --os-surface: #C0C0C0;
+      --os-dark:    #0D0D0D;
+      --os-navy:    #000080;
+      --os-muted:   #808080;
+      --os-white:   #FFFFFF;
+      --os-green:   #008000;
+      --os-yellow:  #FFD700;
+      --bevel-out: inset 2px 2px 0 #fff, inset -2px -2px 0 #808080;
+      --bevel-in:  inset 2px 2px 0 #808080, inset -2px -2px 0 #fff;
+    }
+
+    body {
+      background: #005050;
+      background-image: linear-gradient(45deg,#006060 25%,transparent 25%,transparent 75%,#006060 75%),
+                        linear-gradient(45deg,#006060 25%,transparent 25%,transparent 75%,#006060 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 24px 16px 0;
+    }
+
+    /* ── Window chrome ── */
+    .window {
+      width: 860px;
+      max-width: 100%;
+      background: var(--os-gray);
+      box-shadow: var(--bevel-out);
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      max-height: calc(100vh - 64px);
+    }
+
+    .titlebar {
+      height: 28px;
+      background: var(--os-navy);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .titlebar-left { display: flex; align-items: center; gap: 6px; }
+    .titlebar-icon {
+      width: 16px; height: 16px;
+      background: var(--os-surface);
+      box-shadow: var(--bevel-out);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .titlebar-icon .material-symbols-outlined { font-size: 12px; color: var(--os-dark); }
+
+    .win-btn {
+      width: 18px; height: 18px;
+      background: var(--os-surface);
+      box-shadow: var(--bevel-out);
+      border: 1px solid var(--os-dark);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--os-dark);
+    }
+    .win-btn:active { box-shadow: var(--bevel-in); }
+
+    /* ── Menubar ── */
+    .menubar {
+      height: 22px;
+      background: var(--os-gray);
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      border-bottom: 1px solid var(--os-muted);
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .menu-item {
+      padding: 2px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .menu-item:hover { background: var(--os-navy); color: #fff; }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      padding: 4px 6px;
+      background: var(--os-gray);
+      border-bottom: 1px solid var(--os-muted);
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .btn-os {
+      background: var(--os-surface);
+      box-shadow: var(--bevel-out);
+      border: 1px solid var(--os-dark);
+      padding: 3px 10px;
+      font-family: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .btn-os:active { box-shadow: var(--bevel-in); padding-top: 4px; padding-left: 11px; }
+    .btn-os:disabled { color: var(--os-muted); cursor: default; }
+    .btn-os--sm { padding: 2px 6px; font-size: 11px; }
+    .btn-os--danger { color: #800000; }
+
+    /* ── Main layout ── */
+    .content {
+      display: grid;
+      grid-template-columns: 5fr 3fr 3fr;
+      gap: 6px;
+      padding: 8px;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .panel__title {
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      padding-bottom: 2px;
+      border-bottom: 1px dotted var(--os-muted);
+    }
+    .panel__body {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--os-white);
+      box-shadow: var(--bevel-in);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Friend rows ── */
+    .friend-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      padding: 4px 6px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      user-select: none;
+    }
+    .friend-row:hover { background: var(--os-navy); color: #fff; }
+    .friend-row--selected { background: var(--os-navy); color: #fff; }
+    .friend-row__left { display: flex; align-items: center; gap: 6px; }
+    .friend-row__avatar {
+      width: 20px; height: 20px;
+      background: var(--os-navy);
+      color: #fff;
+      font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .friend-row--selected .friend-row__avatar { background: var(--os-white); color: var(--os-navy); }
+    .friend-row__name { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    .friend-row__status { font-size: 10px; color: var(--os-muted); }
+    .friend-row:hover .friend-row__status,
+    .friend-row--selected .friend-row__status { color: #ccc; }
+
+    .friends-empty {
+      font-size: 11px;
+      color: var(--os-muted);
+      padding: 8px;
+      font-style: italic;
+    }
+
+    /* ── Action bar below friend list ── */
+    .panel__actions {
+      padding: 4px 6px;
+      background: var(--os-gray);
+      border-top: 1px solid var(--os-muted);
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    /* ── Pending requests panel ── */
+    .requests-section { margin-bottom: 8px; }
+    .requests-section__heading {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--os-navy);
+      border-bottom: 1px dotted var(--os-navy);
+      padding: 4px 6px 2px;
+    }
+    .request-item {
+      padding: 6px 6px 4px;
+      border-bottom: 1px solid #eee;
+    }
+    .request-item__name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--os-navy);
+      margin-bottom: 4px;
+    }
+    .request-item__actions { display: flex; gap: 4px; }
+    .requests__empty { font-size: 11px; color: var(--os-muted); padding: 8px; font-style: italic; }
+
+    /* ── Add friend panel ── */
+    .add-friend-form { padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+    .form-field { display: flex; flex-direction: column; gap: 2px; }
+    .form-field label { font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .input-os {
+      box-shadow: var(--bevel-in);
+      background: var(--os-white);
+      border: none;
+      padding: 3px 5px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      width: 100%;
+      outline: none;
+    }
+    .input-os:focus { outline: 1px dotted var(--os-dark); outline-offset: -2px; }
+    textarea.input-os { resize: none; height: 64px; }
+    .form-status { font-size: 11px; min-height: 16px; }
+    .form-status--error { color: #800000; }
+
+    .tip-box {
+      box-shadow: var(--bevel-in);
+      background: #ffffcc;
+      padding: 6px 8px;
+      display: flex;
+      gap: 6px;
+      font-size: 11px;
+      font-style: italic;
+    }
+    .tip-box .material-symbols-outlined { font-size: 16px; color: var(--os-navy); flex-shrink: 0; }
+
+    /* ── Status bar ── */
+    .statusbar {
+      height: 24px;
+      background: var(--os-gray);
+      border-top: 1px solid var(--os-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+    .statusbar-pane {
+      box-shadow: var(--bevel-in);
+      background: var(--os-surface);
+      padding: 1px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .status-pulse {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--os-green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    /* ── Taskbar ── */
+    .taskbar {
+      width: 860px; max-width: 100%;
+      background: var(--os-surface);
+      border-top: 2px solid var(--os-white);
+      padding: 2px 4px;
+      display: flex;
+      align-items: center;
+      height: 36px;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .start-btn {
+      background: var(--os-surface);
+      box-shadow: var(--bevel-out);
+      border: 1px solid var(--os-dark);
+      padding: 2px 8px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 4px;
+      height: 100%;
+    }
+    .start-btn .icon-win { background: var(--os-navy); padding: 2px; display: flex; }
+    .start-btn .icon-win .material-symbols-outlined { font-size: 12px; color: #fff; }
+
+    .taskbar-item {
+      box-shadow: var(--bevel-in);
+      background: var(--os-gray);
+      padding: 2px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex; align-items: center; gap: 4px;
+      height: 100%;
+      min-width: 120px;
+    }
+    .taskbar-item .material-symbols-outlined { font-size: 14px; }
+
+    .taskbar-clock {
+      margin-left: auto;
+      box-shadow: var(--bevel-in);
+      background: var(--os-surface);
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      height: 100%;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .taskbar-clock .material-symbols-outlined { font-size: 14px; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 16px; }
+    ::-webkit-scrollbar-track { background: var(--os-surface); box-shadow: var(--bevel-in); }
+    ::-webkit-scrollbar-thumb { background: var(--os-surface); box-shadow: var(--bevel-out); }
+  </style>
+</head>
+<body>
+
+<!-- ── Window ── -->
+<div class="window">
+
+  <!-- Title bar -->
+  <div class="titlebar">
+    <div class="titlebar-left">
+      <div class="titlebar-icon">
+        <span class="material-symbols-outlined">group</span>
+      </div>
+      Contacts Manager — Neo-Nostalgia Chat
+    </div>
+    <div style="display:flex;gap:2px;">
+      <button class="win-btn">_</button>
+      <button class="win-btn">□</button>
+      <button class="win-btn" id="btn-close">✕</button>
+    </div>
+  </div>
+
+  <!-- Menu bar -->
+  <div class="menubar">
+    <span class="menu-item">File</span>
+    <span class="menu-item">View</span>
+    <span class="menu-item">Friends</span>
+    <span class="menu-item">Help</span>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <button class="btn-os" id="btn-message" disabled>
+      <span class="material-symbols-outlined" style="font-size:14px;">mail</span> Message
+    </button>
+    <button class="btn-os btn-os--danger" id="btn-remove" disabled>
+      <span class="material-symbols-outlined" style="font-size:14px;">person_remove</span> Remove
+    </button>
+    <button class="btn-os btn-os--danger" id="btn-ban" disabled title="Block this user — terminates friendship and blocks DMs">
+      <span class="material-symbols-outlined" style="font-size:14px;">block</span> Block
+    </button>
+    <div style="width:1px;background:var(--os-muted);margin:0 2px;"></div>
+    <button class="btn-os" id="btn-refresh">
+      <span class="material-symbols-outlined" style="font-size:14px;">refresh</span> Refresh
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Panel 1: Friend list -->
+    <div class="panel">
+      <div class="panel__title">Friends</div>
+      <div class="panel__body" id="friend-list">
+        <p class="friends-empty">Loading…</p>
+      </div>
+      <div class="panel__actions">
+        <button class="btn-os btn-os--sm" id="btn-message-small" disabled>
+          <span class="material-symbols-outlined" style="font-size:12px;">mail</span> Message
+        </button>
+        <button class="btn-os btn-os--sm btn-os--danger" id="btn-remove-small" disabled>
+          <span class="material-symbols-outlined" style="font-size:12px;">person_remove</span> Remove
+        </button>
+        <button class="btn-os btn-os--sm btn-os--danger" id="btn-ban-small" disabled title="Block user">
+          <span class="material-symbols-outlined" style="font-size:12px;">block</span> Block
+        </button>
+      </div>
+    </div>
+
+    <!-- Panel 2: Pending requests -->
+    <div class="panel">
+      <div class="panel__title">Pending Requests</div>
+      <div class="panel__body" style="overflow-y:auto;">
+        <!-- Incoming -->
+        <div class="requests-section">
+          <div class="requests-section__heading">Incoming</div>
+          <div id="incoming-requests"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 3: Blocked users -->
+    <div class="panel">
+      <div class="panel__title">Blocked Users</div>
+      <div class="panel__body" style="overflow-y:auto;" id="ban-list">
+        <p class="friends-empty" style="color:#808080;">No blocked users.</p>
+      </div>
+      <div class="panel__actions">
+        <button class="btn-os btn-os--sm" id="btn-unban" disabled>
+          <span class="material-symbols-outlined" style="font-size:12px;">lock_open</span> Unblock
+        </button>
+      </div>
+    </div>
+
+    <!-- Panel 4: Add friend -->
+    <div class="panel">
+      <div class="panel__title">Add Friend</div>
+      <div class="panel__body" style="overflow-y:auto;">
+        <form class="add-friend-form" id="add-friend-form" novalidate>
+          <div class="form-field">
+            <label for="af-username">Username:</label>
+            <input class="input-os" id="af-username" name="username" type="text" placeholder="e.g. User_123" autocomplete="off" />
+          </div>
+          <div class="form-field">
+            <label for="af-message">Optional Message:</label>
+            <textarea class="input-os" id="af-message" name="message" placeholder="Include a short message…"></textarea>
+          </div>
+          <button class="btn-os" type="submit" style="width:100%;justify-content:center;">
+            <span class="material-symbols-outlined" style="font-size:14px;">send</span> Send Request
+          </button>
+          <div class="form-status" id="af-status" aria-live="polite"></div>
+        </form>
+        <div class="tip-box" style="margin:0 8px 8px;">
+          <span class="material-symbols-outlined">info</span>
+          <div><strong>System Tip:</strong> You can only have up to 256 friends in this beta version of Neo-Nostalgia.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- Status bar -->
+  <div class="statusbar">
+    <div class="statusbar-pane" id="status-total">Total: — Friends</div>
+    <div class="statusbar-pane" id="status-online">Online: —</div>
+    <div class="statusbar-pane" style="margin-left:auto;">
+      <div class="status-pulse"></div>
+      Server Sync: OK
+    </div>
+  </div>
+
+</div><!-- /window -->
+
+<!-- Taskbar -->
+<div class="taskbar">
+  <button class="start-btn">
+    <div class="icon-win"><span class="material-symbols-outlined">grid_view</span></div>
+    Start
+  </button>
+  <div class="taskbar-item">
+    <span class="material-symbols-outlined">group</span>
+    Contacts Manager
+  </div>
+  <div class="taskbar-clock">
+    <span class="material-symbols-outlined">volume_up</span>
+    <span class="material-symbols-outlined">network_check</span>
+    <span id="clock"></span>
+  </div>
+</div>
+
+<script type="module">
+  import { FriendList, PendingRequestsList, AddFriendForm, friendsApi, bansApi } from '../components/friend-list.js';
+  import { presenceManager } from '../components/presence-dot.js';
+
+  // ── Auth guard ────────────────────────────────────────────────────────────
+  const meRes = await fetch('/auth/me', { credentials: 'include' });
+  if (!meRes.ok) { location.href = '/pages/login.html'; }
+
+  // ── Connect presence WS ───────────────────────────────────────────────────
+  presenceManager.connect();
+
+  // ── Friend list ───────────────────────────────────────────────────────────
+  const listEl   = document.getElementById('friend-list');
+  const totalEl  = document.getElementById('status-total');
+  const onlineEl = document.getElementById('status-online');
+  const friendList = new FriendList(listEl, totalEl, onlineEl);
+
+  const btnMsg    = document.getElementById('btn-message');
+  const btnRem    = document.getElementById('btn-remove');
+  const btnMsgSm  = document.getElementById('btn-message-small');
+  const btnRemSm  = document.getElementById('btn-remove-small');
+
+  const btnBan    = document.getElementById('btn-ban');
+  const btnBanSm  = document.getElementById('btn-ban-small');
+
+  listEl.addEventListener('friend:select', (e) => {
+    const selected = !!e.detail;
+    [btnMsg, btnMsgSm].forEach(b => b.disabled = !selected);
+    [btnRem, btnRemSm].forEach(b => b.disabled = !selected);
+    [btnBan, btnBanSm].forEach(b => b.disabled = !selected);
+  });
+
+  async function removeFriend() {
+    const friend = friendList.getSelected();
+    if (!friend) return;
+    if (!confirm(`Remove ${friend.username} from friends?`)) return;
+    try {
+      await friendsApi.remove(friend.user_id);
+      await refresh();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  btnRem.addEventListener('click', removeFriend);
+  btnRemSm.addEventListener('click', removeFriend);
+
+  async function banFriend() {
+    const friend = friendList.getSelected();
+    if (!friend) return;
+    if (!confirm(`Block ${friend.username}? This will remove them as a friend and block all DMs. Cannot be undone without manually unblocking.`)) return;
+    try {
+      await bansApi.ban(friend.user_id);
+      await refresh();
+      await loadBanList();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+  btnBan.addEventListener('click', banFriend);
+  btnBanSm.addEventListener('click', banFriend);
+
+  btnMsg.addEventListener('click', () => {
+    const friend = friendList.getSelected();
+    if (friend) location.href = `/pages/main-chat.html?dm=${friend.user_id}`;
+  });
+  btnMsgSm.addEventListener('click', () => btnMsg.click());
+
+  // ── Pending requests ──────────────────────────────────────────────────────
+  const incomingEl = document.getElementById('incoming-requests');
+  const pendingList = new PendingRequestsList(
+    incomingEl,
+    async (requesterId) => {
+      try { await friendsApi.accept(requesterId); await refresh(); }
+      catch (err) { alert(err.message); }
+    },
+    async (requesterId) => {
+      try { await friendsApi.decline(requesterId); await refresh(); }
+      catch (err) { alert(err.message); }
+    }
+  );
+
+  // ── Add friend form ───────────────────────────────────────────────────────
+  const addForm = new AddFriendForm(
+    document.getElementById('add-friend-form'),
+    document.getElementById('af-status'),
+    () => pendingList.refresh()
+  );
+
+  // ── Ban list ──────────────────────────────────────────────────────────────
+  const banListEl = document.getElementById('ban-list');
+  const btnUnban  = document.getElementById('btn-unban');
+  let selectedBan = null;
+
+  async function loadBanList() {
+    const bans = await bansApi.list();
+    banListEl.innerHTML = '';
+    if (!bans.length) {
+      banListEl.innerHTML = '<p class="friends-empty" style="color:#808080;">No blocked users.</p>';
+      btnUnban.disabled = true;
+      selectedBan = null;
+      return;
+    }
+    bans.forEach(b => {
+      const row = document.createElement('div');
+      row.className = 'friend-item';
+      row.dataset.userId = b.banned_user_id;
+      row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:4px 8px;cursor:pointer;';
+      row.innerHTML = `<span class="material-symbols-outlined" style="font-size:14px;color:#800000;">block</span>
+        <span style="font-family:\'JetBrains Mono\',monospace;font-size:12px;">${b.banned_username}</span>
+        <span style="font-size:10px;color:#808080;margin-left:auto;">${new Date(b.created_at).toLocaleDateString()}</span>`;
+      row.addEventListener('click', () => {
+        banListEl.querySelectorAll('.friend-item').forEach(el => el.classList.remove('selected'));
+        row.classList.add('selected');
+        selectedBan = b;
+        btnUnban.disabled = false;
+      });
+      banListEl.appendChild(row);
+    });
+  }
+
+  btnUnban.addEventListener('click', async () => {
+    if (!selectedBan) return;
+    if (!confirm(`Unblock ${selectedBan.banned_username}?`)) return;
+    try {
+      await bansApi.unban(selectedBan.banned_user_id);
+      selectedBan = null;
+      btnUnban.disabled = true;
+      await loadBanList();
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+
+  // ── Refresh all ───────────────────────────────────────────────────────────
+  async function refresh() {
+    await Promise.all([friendList.refresh(), pendingList.refresh()]);
+  }
+
+  document.getElementById('btn-refresh').addEventListener('click', refresh);
+
+  // ── Clock ─────────────────────────────────────────────────────────────────
+  function updateClock() {
+    document.getElementById('clock').textContent =
+      new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  updateClock();
+  setInterval(updateClock, 30_000);
+
+  // ── Close ─────────────────────────────────────────────────────────────────
+  document.getElementById('btn-close').addEventListener('click', () => {
+    location.href = '/pages/main-chat.html';
+  });
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  await refresh();
+  await loadBanList();
+</script>
+
+</body>
+</html>

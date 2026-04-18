@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Neo-Nostalgia Chat Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;700;800&amp;family=IBM+Plex+Sans:wght@400;700&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background-color: #008080; /* Classic Teal Desktop */
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .win95-outset {
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-bottom: 2px solid #000000;
+            border-right: 2px solid #000000;
+            box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px #808080;
+        }
+        .win95-inset {
+            border-top: 2px solid #808080;
+            border-left: 2px solid #808080;
+            border-bottom: 2px solid #ffffff;
+            border-right: 2px solid #ffffff;
+            background-color: #ffffff;
+        }
+        .win95-button {
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-bottom: 2px solid #000000;
+            border-right: 2px solid #000000;
+            background-color: #c0c0c0;
+            padding: 2px 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .win95-button:active {
+            border-top: 2px solid #000000;
+            border-left: 2px solid #000000;
+            border-bottom: 2px solid #ffffff;
+            border-right: 2px solid #ffffff;
+            padding: 3px 5px 1px 7px;
+        }
+        .material-symbols-outlined {
+            font-size: 18px;
+            vertical-align: middle;
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {},
+                    borderRadius: {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["IBM Plex Sans"],
+                        "body": ["IBM Plex Sans"],
+                        "label": ["IBM Plex Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="flex items-center justify-center p-4">
+<!-- Main Window Container -->
+<div class="w-full max-w-6xl h-[870px] bg-[#c0c0c0] win95-outset flex flex-col overflow-hidden">
+<!-- TopNavBar Execution -->
+<header class="flex justify-between items-center w-full h-10 px-1 bg-[#c0c0c0] dark:bg-[#2d2d2d] border-b-2 border-black">
+<div class="text-sm font-bold px-2 py-1 bg-blue-900 text-white flex items-center h-7 gap-2">
+<span class="material-symbols-outlined text-xs" style="font-size: 14px;">terminal</span>
+<span>ChatAdmin v1.0 - System Administration - [Super User]</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="win95-button w-6 h-6 p-0"><span class="material-symbols-outlined text-sm">help</span></button>
+<button class="win95-button w-6 h-6 p-0 font-bold">_</button>
+<button class="win95-button w-6 h-6 p-0 font-bold">X</button>
+</div>
+</header>
+<!-- Main Body (Sidebar + Content) -->
+<div class="flex flex-1 overflow-hidden p-2 gap-2">
+<!-- SideNavBar Execution -->
+<aside class="bg-[#c0c0c0] dark:bg-[#2d2d2d] border-r-2 border-black h-full w-64 flex flex-col p-2 space-y-1">
+<div class="mb-4 p-2 win95-inset bg-gray-100 flex items-center gap-2">
+<img alt="Admin Avatar" class="w-10 h-10 win95-outset" data-alt="pixelated avatar of a system administrator in retro 8-bit style with clean lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVCT1s_zyZZ_GXDQEELhLAXmEYAqDkpf7YNZUmdTKAy-qOvjdofd5UpTQ4GXGslcyKy5QdT09n1oUGD7_ddiVQfWzodplShMpxFOmm3KHf6Bxwt9pzWuHLz4R9C9aEQJYMs074aD0ULmmNj2VbihD33vA2iqJXZAE4Bu39CpwNa_rKDTXkhOiePsmer-zI_3tkuparqMHxRk60gtS2rpbwfPYsxSh7hHGfqND3RV_xZfssus_06S83BMmc0F_yOGxyFx09DNXBopmL"/>
+<div>
+<div class="font-bold text-xs uppercase">System Operator</div>
+<div class="text-[10px] text-gray-600">Super User</div>
+</div>
+</div>
+<!-- Nav Items -->
+<nav class="flex-1 flex flex-col space-y-1">
+<div class="flex items-center gap-2 px-4 py-2 border-t-2 border-l-2 border-white border-b-2 border-black border-r-2 border-black hover:bg-[#dfdfdf]">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-xs">Dashboard</span>
+</div>
+<div class="flex items-center gap-2 px-4 py-2 border-t-2 border-l-2 border-white border-b-2 border-black border-r-2 border-black hover:bg-[#dfdfdf]">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-xs">User Management</span>
+</div>
+<!-- Active State: Chat Rooms (Moderation context) -->
+<div class="flex items-center gap-2 px-4 py-2 bg-[#c0c0c0] border-t-2 border-l-2 border-black border-b-2 border-white border-r-2 border-white font-bold">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+<span class="text-xs">Chat Rooms</span>
+</div>
+<div class="flex items-center gap-2 px-4 py-2 border-t-2 border-l-2 border-white border-b-2 border-black border-r-2 border-black hover:bg-[#dfdfdf]">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+<span class="text-xs">Moderation</span>
+</div>
+<div class="flex items-center gap-2 px-4 py-2 border-t-2 border-l-2 border-white border-b-2 border-black border-r-2 border-black hover:bg-[#dfdfdf]">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="text-xs">Audit Logs</span>
+</div>
+</nav>
+<!-- Footer Nav -->
+<div class="pt-2 border-t border-gray-400 space-y-1">
+<div class="flex items-center gap-2 px-4 py-1 text-xs hover:bg-[#dfdfdf]">
+<span class="material-symbols-outlined text-sm" data-icon="settings">settings</span>
+<span>System Settings</span>
+</div>
+<div class="flex items-center gap-2 px-4 py-1 text-xs hover:bg-[#dfdfdf] text-red-800">
+<span class="material-symbols-outlined text-sm" data-icon="power_settings_new">power_settings_new</span>
+<span>Log Out</span>
+</div>
+</div>
+</aside>
+<!-- Main Workspace -->
+<main class="flex-1 flex flex-col gap-2 overflow-hidden">
+<!-- Content Toolbar -->
+<div class="flex gap-2 mb-1">
+<button class="win95-button text-xs font-bold">File</button>
+<button class="win95-button text-xs font-bold">Edit</button>
+<button class="win95-button text-xs font-bold">View</button>
+<button class="win95-button text-xs font-bold">Options</button>
+</div>
+<!-- Bento-Style Grid Layout for Admin Tasks -->
+<div class="flex-1 grid grid-cols-12 grid-rows-6 gap-2 min-h-0">
+<!-- Member Management Section (Primary) -->
+<section class="col-span-8 row-span-4 flex flex-col bg-[#c0c0c0] win95-outset p-1">
+<div class="bg-blue-800 text-white text-[11px] px-2 py-0.5 font-bold mb-1">Member Management - Current Room: #The-Lobby</div>
+<div class="flex-1 win95-inset overflow-auto">
+<table class="w-full text-xs border-collapse">
+<thead class="bg-[#c0c0c0] sticky top-0 border-b border-gray-500">
+<tr class="text-left">
+<th class="p-1 border-r border-gray-400 font-normal">User</th>
+<th class="p-1 border-r border-gray-400 font-normal">Status</th>
+<th class="p-1 border-r border-gray-400 font-normal">Role</th>
+<th class="p-1 border-r border-gray-400 font-normal">Join Date</th>
+<th class="p-1 font-normal">Actions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-gray-200 hover:bg-blue-100">
+<td class="p-1 border-r border-gray-200">retro_king99</td>
+<td class="p-1 border-r border-gray-200 text-green-700">Online</td>
+<td class="p-1 border-r border-gray-200">Moderator</td>
+<td class="p-1 border-r border-gray-200">Oct 12, 1998</td>
+<td class="p-1 flex gap-1">
+<button class="win95-button text-[10px]">Remove</button>
+<button class="win95-button text-[10px]">Ban</button>
+</td>
+</tr>
+<tr class="border-b border-gray-200 bg-gray-50">
+<td class="p-1 border-r border-gray-200">dialup_dave</td>
+<td class="p-1 border-r border-gray-200 text-gray-500">Idle</td>
+<td class="p-1 border-r border-gray-200">User</td>
+<td class="p-1 border-r border-gray-200">Jan 04, 1999</td>
+<td class="p-1 flex gap-1">
+<button class="win95-button text-[10px]">Remove</button>
+<button class="win95-button text-[10px]">Ban</button>
+</td>
+</tr>
+<tr class="border-b border-gray-200">
+<td class="p-1 border-r border-gray-200 font-bold">matrix_fan</td>
+<td class="p-1 border-r border-gray-200 text-green-700">Online</td>
+<td class="p-1 border-r border-gray-200 text-blue-800">Admin</td>
+<td class="p-1 border-r border-gray-200">Nov 22, 1998</td>
+<td class="p-1 flex gap-1">
+<button class="win95-button text-[10px]">Manage</button>
+</td>
+</tr>
+<tr class="border-b border-gray-200">
+<td class="p-1 border-r border-gray-200">spam_bot_04</td>
+<td class="p-1 border-r border-gray-200 text-red-600">Flagged</td>
+<td class="p-1 border-r border-gray-200">Guest</td>
+<td class="p-1 border-r border-gray-200">Today</td>
+<td class="p-1 flex gap-1">
+<button class="win95-button text-[10px] bg-red-100">BAN</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Global Actions Sidebar -->
+<section class="col-span-4 row-span-4 flex flex-col bg-[#c0c0c0] win95-outset p-1">
+<div class="bg-blue-800 text-white text-[11px] px-2 py-0.5 font-bold mb-2">Global Actions</div>
+<div class="flex flex-col gap-2 p-2">
+<button class="win95-button w-full justify-start py-2">
+<span class="material-symbols-outlined" data-icon="delete_sweep">delete_sweep</span>
+<span class="text-xs">Clear Message History</span>
+</button>
+<button class="win95-button w-full justify-start py-2">
+<span class="material-symbols-outlined" data-icon="block">block</span>
+<span class="text-xs">View Banned Users</span>
+</button>
+<button class="win95-button w-full justify-start py-2 text-red-800">
+<span class="material-symbols-outlined" data-icon="delete_forever">delete_forever</span>
+<span class="text-xs">Delete Current Room</span>
+</button>
+<div class="mt-4 p-2 win95-inset bg-gray-200 text-[10px]">
+<p class="font-bold mb-1">Server Status:</p>
+<div class="flex justify-between"><span>Uptime:</span><span>142h 12m</span></div>
+<div class="flex justify-between"><span>CPU:</span><span>14%</span></div>
+<div class="flex justify-between"><span>Users:</span><span>1,204</span></div>
+</div>
+</div>
+</section>
+<!-- Jabber Dashboard segment (Terminal Style) -->
+<section class="col-span-6 row-span-2 flex flex-col bg-[#c0c0c0] win95-outset p-1">
+<div class="bg-gray-700 text-white text-[10px] px-2 py-0.5 flex justify-between">
+<span>JABBER_DASHBOARD.EXE</span>
+<span class="material-symbols-outlined text-[12px]">terminal</span>
+</div>
+<div class="flex-1 bg-black text-green-500 p-2 mono text-[10px] overflow-hidden leading-tight">
+<div>[SYSTEM] Initializing Jabber Federation...</div>
+<div>[AUTH] SuperUser connection established via SSL</div>
+<div>[TRAFFIC] s2s stream: jabber.org -&gt; OK (2.4kbps)</div>
+<div>[INFO] Active clusters: US-EAST-01, EU-WEST-04</div>
+<div>[STAT] Incoming stanzas: 452/min</div>
+<div class="animate-pulse">_</div>
+</div>
+</section>
+<!-- Banned Users "Modal" (Sectioned) -->
+<section class="col-span-6 row-span-2 flex flex-col bg-[#c0c0c0] win95-outset p-1">
+<div class="bg-red-900 text-white text-[11px] px-2 py-0.5 font-bold mb-1">Restricted Access Log (Banned)</div>
+<div class="flex-1 win95-inset overflow-auto">
+<table class="w-full text-[10px] border-collapse">
+<thead class="bg-gray-200 border-b border-gray-400 text-left">
+<tr>
+<th class="p-1">User</th>
+<th class="p-1">Banned By</th>
+<th class="p-1">Reason</th>
+<th class="p-1">Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-gray-200">
+<td class="p-1">naughty_user</td>
+<td class="p-1">admin_01</td>
+<td class="p-1 italic">Spamming ads</td>
+<td class="p-1"><button class="win95-button py-0 px-1 text-[9px]">Unban</button></td>
+</tr>
+<tr class="border-b border-gray-200">
+<td class="p-1">troll_master</td>
+<td class="p-1">system</td>
+<td class="p-1 italic">Abusive content</td>
+<td class="p-1"><button class="win95-button py-0 px-1 text-[9px]">Unban</button></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+</div>
+<!-- Taskbar / Footer Status -->
+<footer class="h-6 bg-[#c0c0c0] win95-outset mt-1 flex items-center px-1 text-[10px] gap-2">
+<div class="win95-inset px-2 py-0.5 flex-1 flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-size: 14px;">info</span>
+<span>Ready. System Load: Normal.</span>
+</div>
+<div class="win95-inset px-4 py-0.5 w-32 text-center font-bold">
+                12:45 PM
+            </div>
+</footer>
+</div>
+<!-- Background Window Decoration (Mock Taskbar) -->
+<div class="fixed bottom-0 left-0 right-0 h-10 bg-[#c0c0c0] win95-outset flex items-center p-1 z-[-1]">
+<button class="win95-button px-4 flex items-center gap-1 font-extrabold italic text-sm">
+<img alt="Start" class="w-4 h-4" data-alt="classic windows 95 start logo with colorful pixel squares" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyCokuK1yJ_bYdNzOOOBjyS0p4RLPjfsZd1NwNKNGJhOoZRzeC4ECtgvd-tSVSKUTFtwApFnntm_5UZpqVXrwj2_vZrNY5YYpwQhI6au3hdPAG-qN6fVhuvkdOuJeO8hwCbemefnNz2AE4139uL42ja2_Oocf1yp8O13vIY3shyvb8I7p6MMfXRFRmL50dwS5VkFWZVt83B2AKdDQklF1vIULdJgQ8aGV9s0O-PSP57oKjajRcEZcWjriP3Yztu-d60kGPGfVrX62x"/>
+            Start
+        </button>
+<div class="ml-4 flex gap-1 h-full">
+<div class="win95-button bg-[#dfdfdf] border-t-2 border-l-2 border-black border-b-2 border-white border-r-2 border-white px-3 text-xs flex items-center gap-1">
+<span class="material-symbols-outlined" style="font-size: 14px;">terminal</span>
+                System Administration
+            </div>
+<div class="win95-button px-3 text-xs flex items-center gap-1">
+<span class="material-symbols-outlined" style="font-size: 14px;">mail</span>
+                Inbox (2)
+            </div>
+</div>
+<div class="ml-auto win95-inset px-2 h-full flex items-center gap-3">
+<span class="material-symbols-outlined" style="font-size: 14px;">volume_up</span>
+<span class="material-symbols-outlined" style="font-size: 14px;">bolt</span>
+<span class="text-xs font-bold">12:45 PM</span>
+</div>
+</div>
+</body></html>

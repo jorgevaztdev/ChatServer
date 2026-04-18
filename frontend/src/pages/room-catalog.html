@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Room Catalog — Neo-Nostalgia Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --os-gray: #DFDFDF;
+      --os-dark: #0D0D0D;
+      --os-navy: #000080;
+      --os-muted: #808080;
+      --primary: #17cfcf;
+      --bevel-out: inset 2px 2px 0 #fff, inset -2px -2px 0 #808080;
+      --bevel-in:  inset 2px 2px 0 #808080, inset -2px -2px 0 #fff;
+    }
+
+    body {
+      background: #005050;
+      background-image: linear-gradient(45deg,#006060 25%,transparent 25%,transparent 75%,#006060 75%),
+                        linear-gradient(45deg,#006060 25%,transparent 25%,transparent 75%,#006060 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .window {
+      width: 780px;
+      background: var(--os-gray);
+      box-shadow: var(--bevel-out);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .titlebar {
+      height: 28px;
+      background: var(--os-navy);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      user-select: none;
+    }
+
+    .titlebar-left { display: flex; align-items: center; gap: 6px; }
+
+    .titlebar-icon {
+      width: 16px; height: 16px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .title-btn {
+      width: 18px; height: 18px;
+      background: var(--os-gray);
+      color: var(--os-dark);
+      font-size: 11px;
+      font-weight: 900;
+      border: none;
+      cursor: pointer;
+      box-shadow: var(--bevel-out);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .title-btn:active { box-shadow: var(--bevel-in); }
+
+    .toolbar {
+      padding: 8px 10px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      border-bottom: 2px solid #808080;
+    }
+
+    .search-wrap {
+      flex: 1;
+      display: flex;
+      gap: 6px;
+    }
+
+    .search-input {
+      flex: 1;
+      height: 28px;
+      padding: 0 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: #fff;
+      border: none;
+      box-shadow: var(--bevel-in);
+      color: var(--os-dark);
+      outline: none;
+    }
+    .search-input:focus { outline: 1px dotted var(--primary); }
+
+    .btn {
+      height: 28px;
+      padding: 0 14px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--os-gray);
+      color: var(--os-dark);
+      border: none;
+      cursor: pointer;
+      box-shadow: var(--bevel-out);
+      white-space: nowrap;
+    }
+    .btn:active { box-shadow: var(--bevel-in); }
+    .btn:disabled { color: var(--os-muted); cursor: default; }
+    .btn-primary { background: var(--primary); color: #fff; }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      min-height: 420px;
+    }
+
+    .status-bar {
+      padding: 4px 10px;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--os-muted);
+      border-bottom: 1px solid #808080;
+      background: var(--os-gray);
+    }
+
+    #room-list-container {
+      flex: 1;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow-y: auto;
+      max-height: 480px;
+    }
+
+    .room-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 10px;
+      background: #fff;
+      box-shadow: var(--bevel-in);
+      cursor: default;
+    }
+    .room-item:hover { background: #e8f8f8; }
+
+    .room-icon {
+      width: 24px; height: 24px;
+      background: var(--primary);
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      color: #fff;
+      font-weight: 700;
+      margin-right: 10px;
+    }
+
+    .room-info { flex: 1; min-width: 0; }
+    .room-name {
+      font-weight: 700;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .room-desc {
+      font-size: 12px;
+      color: var(--os-muted);
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .room-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      margin-left: 12px;
+      flex-shrink: 0;
+    }
+    .room-count {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--os-muted);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--os-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+    }
+
+    .statusbar-footer {
+      height: 24px;
+      border-top: 2px solid #fff;
+      background: var(--os-gray);
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      gap: 4px;
+    }
+    .statusbar-segment {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--os-dark);
+      border: 1px solid var(--os-muted);
+      padding: 0 8px;
+      height: 16px;
+      display: flex; align-items: center;
+    }
+
+    /* Create Room modal */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      width: 420px;
+      background: var(--os-gray);
+      box-shadow: var(--bevel-out);
+    }
+    .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+    .form-row { display: flex; flex-direction: column; gap: 4px; }
+    .form-label { font-size: 13px; font-weight: 600; }
+    .form-input {
+      height: 28px;
+      padding: 0 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      background: #fff;
+      border: none;
+      box-shadow: var(--bevel-in);
+      outline: none;
+    }
+    .form-input:focus { outline: 1px dotted var(--primary); }
+    textarea.form-input {
+      height: 60px;
+      padding: 6px 8px;
+      resize: none;
+    }
+
+    .checkbox-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; cursor: pointer;
+    }
+
+    .os-checkbox {
+      appearance: none;
+      width: 16px; height: 16px;
+      background: #fff;
+      box-shadow: var(--bevel-in);
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .os-checkbox:checked::before {
+      content: '';
+      position: absolute;
+      top: 2px; left: 4px;
+      width: 6px; height: 10px;
+      border: solid var(--os-dark);
+      border-width: 0 3px 3px 0;
+      transform: rotate(45deg);
+    }
+
+    .modal-footer {
+      padding: 10px 14px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      border-top: 2px solid #fff;
+    }
+
+    .error-msg {
+      font-size: 12px;
+      color: #800000;
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="window">
+  <!-- Title Bar -->
+  <div class="titlebar">
+    <div class="titlebar-left">
+      <span class="titlebar-icon"></span>
+      Room Catalog
+    </div>
+    <button class="title-btn" onclick="location.href='main-chat.html'">X</button>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <input id="search-input" class="search-input" type="text" placeholder="Search rooms..." />
+      <button class="btn" onclick="doSearch()">Search</button>
+    </div>
+    <button class="btn btn-primary" onclick="openCreateModal()">+ New Room</button>
+    <button class="btn" onclick="location.href='main-chat.html'">Back to Chat</button>
+  </div>
+
+  <!-- Status -->
+  <div class="status-bar" id="status-bar">Loading rooms...</div>
+
+  <!-- Room List -->
+  <div class="content">
+    <div id="room-list-container">
+      <div class="empty-state">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="statusbar-footer">
+    <div class="statusbar-segment" id="count-seg">0 rooms</div>
+    <div class="statusbar-segment" id="user-seg">...</div>
+  </div>
+</div>
+
+<!-- Create Room Modal -->
+<div class="modal-overlay" id="create-modal">
+  <div class="modal">
+    <div class="titlebar">
+      <div class="titlebar-left">
+        <span class="titlebar-icon"></span>
+        Create New Room
+      </div>
+      <button class="title-btn" onclick="closeCreateModal()">X</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label class="form-label">Room Name</label>
+        <input id="new-name" class="form-input" type="text" placeholder="e.g. dev-chat" maxlength="64" />
+      </div>
+      <div class="form-row">
+        <label class="form-label">Description (optional)</label>
+        <textarea id="new-desc" class="form-input" placeholder="What's this room about?"></textarea>
+      </div>
+      <label class="checkbox-row">
+        <input id="new-private" type="checkbox" class="os-checkbox" />
+        Private room (invite-only)
+      </label>
+      <div class="error-msg" id="create-error"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeCreateModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitCreate()">Create</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { roomList } from '../components/room-list.js';
+
+  window.roomList = roomList;
+
+  async function init() {
+    const me = await fetch('/auth/me').then(r => r.json()).catch(() => null);
+    if (!me || me.detail) { location.href = 'login.html'; return; }
+    document.getElementById('user-seg').textContent = me.username;
+    await roomList.load();
+  }
+
+  window.doSearch = async () => {
+    const q = document.getElementById('search-input').value.trim();
+    await roomList.search(q);
+  };
+
+  document.getElementById('search-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.doSearch();
+  });
+
+  window.openCreateModal = () => {
+    document.getElementById('create-modal').classList.add('open');
+    document.getElementById('new-name').focus();
+  };
+
+  window.closeCreateModal = () => {
+    document.getElementById('create-modal').classList.remove('open');
+    document.getElementById('create-error').textContent = '';
+    document.getElementById('new-name').value = '';
+    document.getElementById('new-desc').value = '';
+    document.getElementById('new-private').checked = false;
+  };
+
+  window.submitCreate = async () => {
+    const name = document.getElementById('new-name').value.trim();
+    const description = document.getElementById('new-desc').value.trim() || null;
+    const is_private = document.getElementById('new-private').checked;
+    const errEl = document.getElementById('create-error');
+    errEl.textContent = '';
+
+    if (!name) { errEl.textContent = 'Room name is required.'; return; }
+
+    const res = await fetch('/rooms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, description, is_private }),
+    });
+
+    if (res.ok) {
+      window.closeCreateModal();
+      await roomList.load();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      errEl.textContent = data.detail || 'Failed to create room.';
+    }
+  };
+
+  init();
+</script>
+</body>
+</html>

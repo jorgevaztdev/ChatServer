@@ -1,0 +1,24 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - sqlite_data:/data
+      - media_data:/media
+    environment:
+      - DATABASE_URL=sqlite:////data/chat.db
+      - MEDIA_DIR=/media
+      - JWT_SECRET=changeme-in-production
+      - JWT_ALGORITHM=HS256
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  sqlite_data:
+  media_data:

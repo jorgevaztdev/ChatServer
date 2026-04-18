@@ -1,0 +1,9 @@
+fastapi==0.115.12
+uvicorn[standard]==0.34.0
+sqlalchemy==2.0.40
+alembic==1.15.2
+python-jose[cryptography]==3.3.0
+bcrypt==4.2.1
+aiofiles==24.1.0
+python-multipart==0.0.20
+aioxmpp==0.13.3

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Room Management - Neo-Nostalgia Chat</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#17cfcf",
+          "background-light": "#f6f8f8",
+          "background-dark": "#112121",
+          "os-gray": "#DFDFDF",
+          "os-dark": "#0D0D0D",
+          "os-navy": "#000080",
+          "os-muted": "#808080"
+        },
+        fontFamily: {
+          "display": ["Inter", "sans-serif"],
+          "body": ["Inter", "sans-serif"]
+        },
+        borderRadius: {"DEFAULT": "0.125rem", "sm": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+        boxShadow: {
+          'bevel-out': 'inset 2px 2px 0px 0px #FFFFFF, inset -2px -2px 0px 0px #808080',
+          'bevel-in': 'inset 2px 2px 0px 0px #808080, inset -2px -2px 0px 0px #FFFFFF',
+        }
+      },
+    },
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .bevel-out { box-shadow: inset 2px 2px 0px 0px #FFFFFF, inset -2px -2px 0px 0px #808080; }
+  .bevel-in { box-shadow: inset 2px 2px 0px 0px #808080, inset -2px -2px 0px 0px #FFFFFF; }
+  .pulse-border { animation: pulseBorder 2s infinite; }
+  @keyframes pulseBorder {
+    0% { outline: 2px solid transparent; outline-offset: 2px; }
+    50% { outline: 2px solid #17cfcf; outline-offset: 2px; }
+    100% { outline: 2px solid transparent; outline-offset: 2px; }
+  }
+  
+  /* Custom Checkbox */
+  .os-checkbox {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background-color: #FFFFFF;
+    box-shadow: inset 2px 2px 0px 0px #808080, inset -2px -2px 0px 0px #FFFFFF;
+    position: relative;
+    cursor: pointer;
+    border-radius: 0;
+  }
+  .os-checkbox:checked::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 4px;
+    width: 6px;
+    height: 10px;
+    border: solid #0D0D0D;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+  }
+  
+  /* Blurred Background Pattern for context */
+  .fake-desktop-bg {
+    background-color: #005050;
+    background-image: linear-gradient(45deg, #006060 25%, transparent 25%, transparent 75%, #006060 75%, #006060), linear-gradient(45deg, #006060 25%, transparent 25%, transparent 75%, #006060 75%, #006060);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+  }
+</style>
+</head>
+<body class="fake-desktop-bg h-screen w-screen flex items-center justify-center overflow-hidden">
+<!-- Background Chat Context (Abstracted) -->
+<div class="absolute inset-0 opacity-20 pointer-events-none flex">
+<div class="w-[200px] border-r-2 border-os-dark h-full bg-os-gray"></div>
+<div class="flex-1 h-full bg-white flex flex-col justify-end p-4">
+<div class="h-4 bg-gray-200 w-1/2 mb-2"></div>
+<div class="h-4 bg-gray-200 w-3/4 mb-2"></div>
+<div class="h-4 bg-gray-200 w-1/3 mb-2"></div>
+<div class="h-16 bg-gray-100 mt-4 border-2 border-os-dark"></div>
+</div>
+<div class="w-[200px] border-l-2 border-os-dark h-full bg-os-gray"></div>
+</div>
+<!-- Room Management Modal -->
+<div class="relative w-[600px] h-[500px] bg-os-gray/85 backdrop-blur-[12px] flex flex-col rounded-sm bevel-out z-10 font-body text-os-dark">
+<!-- Title Bar -->
+<div class="h-8 bg-os-navy text-white flex items-center justify-between px-2 cursor-move rounded-t-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">chat</span>
+<h2 class="font-display font-bold text-sm tracking-tight">Room Management *</h2>
+</div>
+<button class="w-5 h-5 bg-os-gray text-os-dark font-bold text-xs flex items-center justify-center bevel-out active:bevel-in hover:bg-white rounded-sm">X</button>
+</div>
+<!-- Main Content Area -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Sidebar Navigation -->
+<div class="w-[150px] bg-os-gray/50 border-r-2 border-[#808080] p-2 flex flex-col gap-1">
+<button class="w-full text-left px-3 py-2 bg-primary/20 text-os-dark font-medium text-sm rounded-sm bevel-in flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+          General
+        </button>
+<button class="w-full text-left px-3 py-2 text-os-dark font-medium text-sm hover:bg-white/50 rounded-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+          Permissions
+        </button>
+<button class="w-full text-left px-3 py-2 text-os-dark font-medium text-sm hover:bg-white/50 rounded-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">public</span>
+          Webhooks
+        </button>
+<button class="w-full text-left px-3 py-2 text-[#800000] font-medium text-sm hover:bg-white/50 rounded-sm flex items-center gap-2 mt-auto">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+          Danger Zone
+        </button>
+</div>
+<!-- Settings Canvas -->
+<div class="flex-1 p-6 bg-transparent flex flex-col gap-6 overflow-y-auto">
+<!-- Header -->
+<div class="border-b-2 border-[#808080] pb-2">
+<h3 class="font-display font-bold text-lg text-os-dark">General Settings</h3>
+<p class="text-xs text-os-muted mt-1 font-mono">Configure primary room details.</p>
+</div>
+<!-- Form Elements -->
+<div class="flex flex-col gap-5">
+<div class="flex flex-col gap-1">
+<label class="font-medium text-sm text-os-dark">Room Name</label>
+<input class="w-full h-8 px-2 bg-white text-sm font-mono bevel-in focus:outline-none focus:ring-1 focus:ring-primary rounded-sm border-none" type="text" value="Development_Chat"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-medium text-sm text-os-dark">Room Topic</label>
+<textarea class="w-full h-20 px-2 py-1 bg-white text-sm font-mono bevel-in focus:outline-none focus:ring-1 focus:ring-primary resize-none rounded-sm border-none">Main channel for frontend development coordination and build logs.</textarea>
+</div>
+<div class="flex flex-col gap-3 mt-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="os-checkbox" type="checkbox"/>
+<span class="text-sm font-medium select-none group-hover:text-primary transition-colors">Allow external guests</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="os-checkbox" type="checkbox"/>
+<span class="text-sm font-medium select-none group-hover:text-primary transition-colors">Enable slow mode (1 msg/10s)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="os-checkbox" type="checkbox"/>
+<span class="text-sm font-medium select-none group-hover:text-primary transition-colors">Log message history</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Action Bar -->
+<div class="h-14 border-t-2 border-[#FFFFFF] bg-os-gray flex items-center justify-end px-4 gap-3 rounded-b-sm">
+<div class="flex-1 px-2 flex items-center">
+<span class="text-xs font-mono text-[#800000]">* Unsaved changes</span>
+</div>
+<button class="px-6 py-1.5 bg-os-gray text-os-dark font-medium text-sm bevel-out active:bevel-in hover:bg-[#e8e8e8] rounded-sm transition-all focus:outline-none focus:ring-1 focus:ring-os-dark">
+        Cancel
+      </button>
+<button class="px-6 py-1.5 bg-os-gray text-os-dark font-medium text-sm bevel-out active:bevel-in hover:bg-[#e8e8e8] rounded-sm transition-all pulse-border focus:outline-none">
+        Apply
+      </button>
+</div>
+</div>
+</body></html>

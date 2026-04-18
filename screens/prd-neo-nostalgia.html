@@ -1,0 +1,235 @@
+# Neo-Nostalgia Chat
+
+## Product Overview
+
+**The Pitch:** A premium desktop chat client merging the tactile satisfaction of 90s operating systems with modern real-time performance. It brings intentionality back to digital communication through brutalist-yet-refined UI paradigms.
+
+**For:** Power users, developers, and design enthusiasts who miss the spatial memory and high-density information layouts of legacy software.
+
+**Device:** desktop
+
+**Design Direction:** Windows 95 meets 2024. Thick beveled claymorphism, classic gray/teal palettes, pixel-perfect iconography, overlaid with modern glassmorphism and crisp neo-grotesque typography.
+
+**Inspired by:** mIRC, Windows 98, Discord
+
+---
+
+## Screens
+
+- **Login:** Entry gateway, classic OS dialog box styling
+- **Register:** Account creation, multi-step wizard aesthetic
+- **Forgot Password:** Recovery flow, terminal-inspired alert styling
+- **Main Chat:** 3-column layout (Servers/Rooms, Chat Grid, Online Users)
+- **Room Management:** Floating glass modal, tabbed configuration interface
+
+---
+
+## Key Flows
+
+**Authentication:** Gaining system access
+1. User is on Login -> sees centralized OS-style dialog box on teal background
+2. User clicks **Connect** -> inset button press animation triggers
+3. Authenticated directly into Main Chat
+
+**Room Configuration:** Modifying channel parameters
+1. User is on Main Chat -> sees active room settings icon
+2. User clicks **Gear Icon** -> frosted glass Room Management modal opens
+3. Modifies permissions -> clicks **Apply** -> claymorphic success state
+
+---
+
+<details>
+<summary>Design System</summary>
+
+## Color Palette
+
+- **Primary:** `#008080` - Windows Teal (Active states, brand accents)
+- **Background:** `#005050` - Deep teal desktop background
+- **Surface:** `#DFDFDF` - Classic OS Gray (Modals, sidebars)
+- **Text:** `#0D0D0D` - Near-black (Primary reading text)
+- **Muted:** `#808080` - Mid-gray (Disabled states, timestamp text)
+- **Accent:** `#000080` - Navy Blue (Active window title bars)
+- **Highlight:** `#FFFFFF` - Pure white (Top/Left bevels, input backgrounds)
+- **Shadow:** `#000000` - Pure black (Bottom/Right bevels, text shadows)
+
+## Typography
+
+Distinctive neo-grotesque mixed with terminal monospaced fonts.
+
+- **Headings:** `IBM Plex Sans`, 700, 24px (Title bars, primary headers)
+- **Body:** `IBM Plex Sans`, 500, 14px (Chat messages, UI labels)
+- **Small text:** `JetBrains Mono`, 400, 12px (Timestamps, system logs)
+- **Buttons:** `IBM Plex Sans`, 600, 14px (All CTAs)
+
+**Style notes:** 
+- **Claymorphism Bevels:** All surfaces use strict 2px inset shadows (`inset 2px 2px 0px #FFF, inset -2px -2px 0px #808080`).
+- **Active Window:** The active modal/column has a `#000080` header with white text.
+- **Glass Effects:** Modals use `#DFDFDF` at 85% opacity with 12px backdrop blur.
+- **No Border Radius:** Strict 0px radius on all elements.
+
+## Design Tokens
+
+```css
+:root {
+  --color-primary: #008080;
+  --color-bg: #005050;
+  --color-surface: rgba(223, 223, 223, 0.85);
+  --color-text: #0D0D0D;
+  --color-accent: #000080;
+  --font-primary: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius: 0px;
+  --bevel-out: inset 2px 2px 0px 0px #FFFFFF, inset -2px -2px 0px 0px #808080;
+  --bevel-in: inset 2px 2px 0px 0px #808080, inset -2px -2px 0px 0px #FFFFFF;
+}
+```
+
+</details>
+
+---
+
+<details>
+<summary>Screen Specifications</summary>
+
+### Login
+
+**Purpose:** Initial user authentication
+
+**Layout:** Centered 400px dialog box on solid `#005050` background
+
+**Key Elements:**
+- **Title Bar:** `#000080` background, white text "System Login", classic 'X' close button top right
+- **Username Input:** `#FFFFFF` background, `--bevel-in` styling, blinking block cursor
+- **Connect Button:** `--bevel-out` styling, `#DFDFDF` background, transforms to `--bevel-in` on active
+
+**States:**
+- **Empty:** Inputs stark white, Connect button disabled (`#808080` text)
+- **Loading:** Mouse cursor changes to classic hourglass icon
+- **Error:** Red text `#FF0000` below input: `ERR_INVALID_CREDENTIALS`
+
+**Components:**
+- **Dialog Box:** 400x300px, `--color-surface`, `--bevel-out`, backdrop-blur `12px`
+
+**Interactions:**
+- **Click Input:** Gains strict 1px dotted black outline
+- **Click Connect:** Instant visual depression of button via `--bevel-in` swap
+
+**Responsive:**
+- **Desktop:** Fixed 400px center
+
+### Register
+
+**Purpose:** New user onboarding
+
+**Layout:** Centered 450px multi-tab dialog
+
+**Key Elements:**
+- **Tab Bar:** Top-aligned, active tab flows seamlessly into content area
+- **Avatar Picker:** 64x64px grid of pixelated default avatars, `--bevel-in` frame
+- **Progress Indicator:** Classic segmented green loading bar `#008000`
+
+**States:**
+- **Error:** Alert sound (implied), shaking animation on dialog
+
+**Components:**
+- **Input Group:** Label (`IBM Plex Sans`, 14px), Input box (32px height, `--bevel-in`)
+
+**Interactions:**
+- **Hover Avatar:** Dotted outline border
+- **Click Register:** Progress bar fills strictly in 10% increments over 1s
+
+**Responsive:**
+- **Desktop:** Fixed 450px center
+
+### Forgot Password
+
+**Purpose:** Credential recovery
+
+**Layout:** Minimal 350px centered alert dialog
+
+**Key Elements:**
+- **Warning Icon:** 32x32px pixelated yellow triangle exclamation mark
+- **Recovery Input:** Email address field
+- **Action Buttons:** Side-by-side **Send Link** and **Cancel**
+
+**States:**
+- **Success:** Dialog content replaces with strictly monospaced `MAIL_SENT_OK`
+
+**Components:**
+- **Action Strip:** Right-aligned bottom row, 12px padding, `--bevel-out` separator line above
+
+**Interactions:**
+- **Click Cancel:** Returns instantly to Login
+
+**Responsive:**
+- **Desktop:** Fixed 350px center
+
+### Main Chat
+
+**Purpose:** Core communication interface
+
+**Layout:** 3-column strict grid (200px Left, Fluid Center, 200px Right). No gaps, strict 2px borders between panels.
+
+**Key Elements:**
+- **Server List (Left):** Tree-view hierarchy of rooms, dotted connecting lines
+- **Chat Feed (Center):** `#FFFFFF` background, dense text display, strict chronological bottom-up feed
+- **User List (Right):** Grouped by status (Admin, Online, Offline), colored square status indicators
+- **Message Input (Bottom Center):** 64px fixed height, pinned bottom, spanning center column
+
+**States:**
+- **Empty Room:** Center feed shows large pixelated ghost icon and "ROOM IS SILENT"
+- **Loading:** Classic "Receiving data..." marquee in status bar
+
+**Components:**
+- **Chat Bubble:** No bubbles. Strict inline text format: `[14:32] <Username> Message payload here`
+- **Status Bar:** Spans bottom width of window, 24px height, shows ping and connection status
+
+**Interactions:**
+- **Hover Message:** Subtle `#F0F0F0` row background highlight
+- **Double-click Room:** instantly swaps chat context, active room gets `#000080` highlight in tree
+
+**Responsive:**
+- **Desktop:** 100vh, 100vw, unscrollable body (scrollable internal panes)
+
+### Room Management
+
+**Purpose:** Administrative configuration for channels
+
+**Layout:** 600x500px modal overlay centered on top of Main Chat
+
+**Key Elements:**
+- **Navigation Sidebar:** Left-aligned 150px list (General, Permissions, Webhooks, Danger Zone)
+- **Settings Canvas:** Right-aligned 450px area containing form controls
+- **Save/Cancel Footer:** Pinned bottom, classic right-aligned button group
+
+**States:**
+- **Unsaved Changes:** Asterisk `*` appears in Title Bar, Save button pulses
+
+**Components:**
+- **Checkbox:** 16x16px custom square, `--bevel-in`, thick black checkmark when active
+- **Danger Button:** Red `#800000` text, prompts secondary confirmation dialog
+
+**Interactions:**
+- **Click Tab:** Instant layout swap, no transitions/fades (strict 90s behavior)
+- **Click Save:** Modal closes, Main Chat status bar flashes "SETTINGS_UPDATED"
+
+**Responsive:**
+- **Desktop:** Fixed 600x500px
+
+</details>
+
+---
+
+<details>
+<summary>Build Guide</summary>
+
+**Stack:** HTML + Tailwind CSS v3
+
+**Build Order:**
+1. **Design Tokens & Global CSS:** Set up `--bevel-in` and `--bevel-out` classes, import `IBM Plex Sans` and `JetBrains Mono`.
+2. **Login:** Establish the core dialog structure and form inputs.
+3. **Main Chat:** Implement the complex 3-column layout, tree-view CSS, and status bar.
+4. **Room Management:** Build the modal system, tabbed navigation, and complex form controls (checkboxes/radios).
+5. **Register / Forgot Password:** Reuse components from Login and Room Management to complete flows.
+
+</details>

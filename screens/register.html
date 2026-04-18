@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-width=1.0" name="viewport"/>
+<title>Register - Neo-Nostalgia Chat</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#17cfcf",
+          "background-light": "#f6f8f8",
+          "background-dark": "#112121",
+          "os-teal": "#008080",
+          "os-bg": "#005050",
+          "os-surface": "rgba(223, 223, 223, 0.85)",
+          "os-surface-solid": "#DFDFDF",
+          "os-text": "#0D0D0D",
+          "os-muted": "#808080",
+          "os-accent": "#000080",
+          "os-white": "#FFFFFF",
+          "os-black": "#000000",
+          "os-green": "#008000"
+        },
+        fontFamily: {
+          "display": ["Inter"],
+          "primary": ['"IBM Plex Sans"', "sans-serif"],
+          "mono": ['"JetBrains Mono"', "monospace"]
+        },
+        borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem", "none": "0px"},
+      },
+    },
+  }
+</script>
+<style>
+  :root {
+    --bevel-out: inset 2px 2px 0px 0px #FFFFFF, inset -2px -2px 0px 0px #808080;
+    --bevel-in: inset 2px 2px 0px 0px #808080, inset -2px -2px 0px 0px #FFFFFF;
+    --bevel-btn-pressed: inset 2px 2px 0px 0px #000000, inset -2px -2px 0px 0px #808080;
+  }
+  
+  body {
+    font-family: var(--font-primary, 'IBM Plex Sans', sans-serif);
+    background-color: theme('colors.os-bg');
+    color: theme('colors.os-text');
+  }
+
+  .bevel-out { box-shadow: var(--bevel-out); }
+  .bevel-in { box-shadow: var(--bevel-in); }
+  
+  .btn-os {
+    box-shadow: var(--bevel-out);
+    background-color: theme('colors.os-surface-solid');
+    border: 1px solid theme('colors.os-black');
+    transition: none;
+  }
+  .btn-os:active {
+    box-shadow: var(--bevel-in);
+    padding-top: 2px;
+    padding-left: 2px;
+    padding-bottom: 0px;
+    padding-right: 0px;
+  }
+  .btn-os:disabled {
+    color: theme('colors.os-muted');
+    text-shadow: 1px 1px 0px theme('colors.os-white');
+  }
+
+  .input-os {
+    box-shadow: var(--bevel-in);
+    background-color: theme('colors.os-white');
+    border: none;
+    border-radius: 0px !important;
+  }
+  .input-os:focus {
+    outline: 1px dotted theme('colors.os-black');
+    outline-offset: -2px;
+  }
+
+  .segmented-bar-container {
+    box-shadow: var(--bevel-in);
+    background-color: theme('colors.os-white');
+    height: 20px;
+    padding: 2px;
+  }
+  .segmented-bar-fill {
+    height: 100%;
+    background-color: theme('colors.os-green');
+    width: 60%; /* Example progress */
+    background-image: linear-gradient(90deg, 
+      transparent 0%, transparent 90%, 
+      theme('colors.os-white') 90%, theme('colors.os-white') 100%);
+    background-size: 20px 100%;
+  }
+
+  .tab-active {
+    background-color: theme('colors.os-surface-solid');
+    box-shadow: inset 2px 2px 0px 0px #FFFFFF, inset -2px 0px 0px 0px #808080;
+    border-bottom: 2px solid theme('colors.os-surface-solid');
+    z-index: 10;
+  }
+  .tab-inactive {
+    background-color: #C0C0C0;
+    box-shadow: var(--bevel-out);
+    margin-top: 4px;
+  }
+
+  .avatar-grid-item {
+    box-shadow: var(--bevel-in);
+    background-color: theme('colors.os-surface-solid');
+  }
+  .avatar-grid-item:hover {
+    outline: 1px dotted theme('colors.os-black');
+    outline-offset: -2px;
+  }
+
+  /* Shaking animation for error state (implied for future use) */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+    20%, 40%, 60%, 80% { transform: translateX(4px); }
+  }
+  .animate-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+<!-- Main Dialog Container -->
+<div class="w-[450px] bg-[rgba(223,223,223,0.85)] backdrop-blur-[12px] bevel-out border border-os-black flex flex-col rounded-none relative">
+<!-- Title Bar -->
+<div class="bg-os-accent h-8 flex items-center justify-between px-2 text-os-white font-primary font-bold text-[14px] tracking-wide select-none">
+<span>Register - Neo-Nostalgia Chat</span>
+<button class="btn-os w-5 h-5 flex items-center justify-center text-os-text font-bold text-xs !border-none !p-0">
+<span class="material-symbols-outlined text-[16px] leading-none block" data-icon="close">close</span>
+</button>
+</div>
+<!-- Content Area -->
+<div class="p-3 flex flex-col gap-4">
+<!-- Tab Bar -->
+<div class="flex gap-1 -mb-[18px] relative z-0">
+<!-- Active Tab -->
+<button class="tab-active px-3 py-1 text-[14px] font-primary font-medium text-os-text cursor-default relative">
+        Account Info
+      </button>
+<!-- Inactive Tab -->
+<button class="tab-inactive px-3 py-1 text-[14px] font-primary font-medium text-os-text cursor-pointer hover:bg-[#D0D0D0]">
+        Avatar Selection
+      </button>
+</div>
+<!-- Main Tab Content Area -->
+<div class="bevel-out bg-os-surface-solid border border-os-black p-4 pt-6 flex flex-col gap-4 relative z-10 mt-4">
+<!-- Input Group: Username -->
+<div class="flex flex-col gap-1">
+<label class="font-primary text-[14px] font-medium text-os-text">Username</label>
+<input class="input-os h-8 px-2 font-mono text-[14px] text-os-text w-full placeholder-os-muted" placeholder="Enter desired handle" type="text"/>
+</div>
+<!-- Input Group: Email -->
+<div class="flex flex-col gap-1">
+<label class="font-primary text-[14px] font-medium text-os-text">Email Address</label>
+<input class="input-os h-8 px-2 font-mono text-[14px] text-os-text w-full placeholder-os-muted" placeholder="user@domain.com" type="email"/>
+</div>
+<!-- Input Group: Password -->
+<div class="flex flex-col gap-1">
+<label class="font-primary text-[14px] font-medium text-os-text">Password</label>
+<input class="input-os h-8 px-2 font-mono text-[14px] text-os-text w-full placeholder-os-muted" placeholder="••••••••" type="password"/>
+</div>
+<!-- Hidden Avatar Selection Content (For demonstration of requested components) -->
+<div class="hidden flex-col gap-2 mt-2">
+<p class="font-primary text-[14px] text-os-text">Select your digital persona:</p>
+<div class="grid grid-cols-5 gap-2">
+<!-- Avatars -->
+<div class="w-16 h-16 avatar-grid-item flex items-center justify-center cursor-pointer">
+<div class="w-12 h-12 bg-gradient-to-br from-red-400 to-red-600 rounded-none bevel-out border border-os-black" data-alt="Pixelated red blocky face avatar"></div>
+</div>
+<div class="w-16 h-16 avatar-grid-item flex items-center justify-center cursor-pointer">
+<div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-none bevel-out border border-os-black" data-alt="Pixelated blue blocky face avatar"></div>
+</div>
+<div class="w-16 h-16 avatar-grid-item flex items-center justify-center cursor-pointer">
+<div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-none bevel-out border border-os-black" data-alt="Pixelated green blocky face avatar"></div>
+</div>
+<div class="w-16 h-16 avatar-grid-item flex items-center justify-center cursor-pointer">
+<div class="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-none bevel-out border border-os-black" data-alt="Pixelated yellow blocky face avatar"></div>
+</div>
+<div class="w-16 h-16 avatar-grid-item flex items-center justify-center cursor-pointer">
+<div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-none bevel-out border border-os-black" data-alt="Pixelated purple blocky face avatar"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Separator Line -->
+<div class="h-0.5 w-full bevel-in my-1"></div>
+<!-- Footer Actions & Progress -->
+<div class="flex flex-col gap-3">
+<!-- Progress Indicator -->
+<div class="flex flex-col gap-1">
+<span class="font-mono text-[12px] text-os-text">Installation Progress...</span>
+<div class="segmented-bar-container w-full">
+<div class="segmented-bar-fill"></div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex justify-end gap-2">
+<button class="btn-os px-6 py-1.5 font-primary text-[14px] font-semibold text-os-text min-w-[80px]">
+          Cancel
+        </button>
+<button class="btn-os px-6 py-1.5 font-primary text-[14px] font-semibold text-os-text min-w-[80px]">
+          Next &gt;
+        </button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

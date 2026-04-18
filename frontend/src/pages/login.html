@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Neo-Nostalgia Chat - System Login</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#17cfcf",
+            "background-light": "#f6f8f8",
+            "surface": "#ffffff",
+            "surface-muted": "#e2e8f0",
+            "text-main": "#0f172a",
+            "text-muted": "#64748b",
+            "accent-blue": "#1e3a8a",
+            "error": "#ef4444"
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"],
+            "mono": ["ui-monospace", "Menlo", "Monaco", "Consolas", "monospace"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.125rem",
+            "sm": "0.125rem",
+            "lg": "0.25rem",
+            "full": "0.75rem"
+          },
+          boxShadow: {
+            "bevel-out": "inset 2px 2px 0px 0px rgba(255,255,255,0.8), inset -2px -2px 0px 0px rgba(100,116,139,0.5), 2px 2px 5px rgba(0,0,0,0.1)",
+            "bevel-in": "inset 2px 2px 0px 0px rgba(100,116,139,0.4), inset -2px -2px 0px 0px rgba(255,255,255,0.9)",
+            "dialog": "4px 4px 15px rgba(0,0,0,0.1), inset 1px 1px 0px rgba(255,255,255,0.8), inset -1px -1px 0px rgba(100,116,139,0.2)"
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #eaf5f5;
+      background-image: radial-gradient(#17cfcf 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    .bevel-out { box-shadow: inset 2px 2px 0px 0px rgba(255,255,255,0.8), inset -2px -2px 0px 0px rgba(100,116,139,0.5), 2px 2px 5px rgba(0,0,0,0.1); background-color: #e2e8f0; }
+    .bevel-in  { box-shadow: inset 2px 2px 0px 0px rgba(100,116,139,0.4), inset -2px -2px 0px 0px rgba(255,255,255,0.9); background-color: #ffffff; }
+    .glass-panel { background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .btn-connect:active { box-shadow: inset 2px 2px 0px 0px rgba(100,116,139,0.4), inset -2px -2px 0px 0px rgba(255,255,255,0.9); transform: translateY(1px) translateX(1px); }
+    .terminal-error { font-family: ui-monospace, monospace; text-shadow: 0 0 2px rgba(239,68,68,0.4); }
+  </style>
+</head>
+<body class="min-h-screen w-full flex items-center justify-center p-4 selection:bg-primary selection:text-white overflow-hidden">
+  <main aria-labelledby="dialog-title" class="w-[400px] glass-panel rounded-sm shadow-dialog flex flex-col relative border border-slate-200">
+    <!-- Title Bar -->
+    <header class="h-8 bg-accent-blue rounded-t-sm flex items-center justify-between px-2 cursor-default select-none border-b border-slate-400">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-white text-sm" style="font-variation-settings:'FILL' 1;">terminal</span>
+        <h1 class="text-white font-bold text-sm tracking-wide" id="dialog-title">System Login</h1>
+      </div>
+      <button aria-label="Close" class="w-5 h-5 bg-surface-muted flex items-center justify-center rounded-sm text-text-main hover:bg-slate-300 transition-colors" style="box-shadow:inset 1px 1px 0 #fff,inset -1px -1px 0 #94a3b8">
+        <span class="material-symbols-outlined text-[14px] font-bold">close</span>
+      </button>
+    </header>
+
+    <!-- Content -->
+    <div class="p-6 flex flex-col gap-5">
+      <div class="flex items-start gap-4 mb-2">
+        <div class="w-12 h-12 bevel-in rounded-sm flex items-center justify-center border border-slate-300 shrink-0">
+          <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings:'FILL' 1;">dns</span>
+        </div>
+        <div>
+          <p class="text-text-main font-medium text-sm leading-tight mb-1">Welcome to Neo-Nostalgia Network.</p>
+          <p class="text-text-muted text-xs">Please authenticate to establish a secure connection.</p>
+        </div>
+      </div>
+
+      <form id="login-form" class="flex flex-col gap-4" onsubmit="handleLogin(event)">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-text-main text-sm font-semibold pl-1" for="email">Email</label>
+          <input autocomplete="email" class="w-full h-9 bevel-in border-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 rounded-sm text-text-main px-3 text-sm font-medium bg-white placeholder:text-slate-400" id="email" name="email" placeholder="user@domain.com" type="email" required/>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-text-main text-sm font-semibold pl-1" for="password">Password</label>
+          <input autocomplete="current-password" class="w-full h-9 bevel-in border-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 rounded-sm text-text-main px-3 text-sm font-medium bg-white placeholder:text-slate-400" id="password" name="password" placeholder="••••••••" type="password" required/>
+        </div>
+
+        <div class="h-4 flex items-center mt-1">
+          <span id="error-msg" class="terminal-error text-error text-[11px] font-bold tracking-tight hidden"></span>
+        </div>
+
+        <div class="mt-2 pt-4 border-t border-slate-300 border-opacity-50 flex items-center justify-between gap-3">
+          <a class="text-xs text-text-muted hover:text-primary transition-colors" href="register.html">New user? Register</a>
+          <div class="flex gap-3">
+            <button class="px-4 h-8 text-sm font-semibold text-text-muted hover:text-text-main transition-colors focus:outline-none rounded-sm" type="button" onclick="window.history.back()">Cancel</button>
+            <button class="btn-connect bevel-out px-6 h-8 text-sm font-bold text-text-main rounded-sm focus:outline-none focus:ring-2 focus:ring-primary ring-offset-1 ring-offset-background-light flex items-center justify-center min-w-[100px]" id="submit-btn" type="submit">Connect</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    async function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      const errEl = document.getElementById('error-msg');
+      errEl.classList.add('hidden');
+      btn.textContent = 'Connecting…';
+      btn.disabled = true;
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ email, password }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.detail || 'ERR_INVALID_CREDENTIALS');
+        }
+        window.location.href = '/main-chat.html';
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.remove('hidden');
+        btn.textContent = 'Connect';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
