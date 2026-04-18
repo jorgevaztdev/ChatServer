@@ -75,6 +75,49 @@ export function init({ ws, roomId, onSendRest }) {
     document.body.appendChild(fi);
   }
 
+  // ── Emoji picker ───────────────────────────────────────────────────────────
+  const EMOJI_LIST = ['😀','😂','😍','🥰','😎','😭','😅','🤔','😮','😡','🥳','😴',
+    '👍','👎','❤️','🔥','✅','❌','🎉','💯','🙏','👀','💀','🤣','😊','😢','😤',
+    '🤯','👋','✨','🎮','🖥️','🐛','🚀','💡','📎','🔒','📝','⚡','🌟','🎯'];
+
+  if (!document.getElementById('emoji-btn')) {
+    const emojiBtn = document.createElement('button');
+    emojiBtn.id = 'emoji-btn';
+    emojiBtn.title = 'Emoji';
+    emojiBtn.textContent = '😊';
+    emojiBtn.style.cssText = 'height:36px;padding:0 8px;background:#DFDFDF;box-shadow:inset 2px 2px 0 #fff,inset -2px -2px 0 #808080;border:none;cursor:pointer;font-size:16px;flex-shrink:0;';
+    inputBar.insertBefore(emojiBtn, input);
+
+    const picker = document.createElement('div');
+    picker.id = 'emoji-picker';
+    picker.style.cssText = 'display:none;position:absolute;bottom:60px;left:0;background:#DFDFDF;box-shadow:inset -2px -2px 0 #fff,inset 2px 2px 0 #808080,0 4px 12px rgba(0,0,0,.3);padding:6px;z-index:100;width:240px;display:none;flex-wrap:wrap;gap:2px;';
+    inputBar.style.position = 'relative';
+    inputBar.appendChild(picker);
+
+    EMOJI_LIST.forEach(em => {
+      const btn = document.createElement('button');
+      btn.textContent = em;
+      btn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:18px;padding:2px;line-height:1;';
+      btn.addEventListener('click', () => {
+        const inp = _input();
+        if (!inp) return;
+        const s = inp.selectionStart ?? inp.value.length;
+        const e2 = inp.selectionEnd ?? s;
+        inp.value = inp.value.slice(0, s) + em + inp.value.slice(e2);
+        inp.selectionStart = inp.selectionEnd = s + em.length;
+        inp.focus();
+        picker.style.display = 'none';
+      });
+      picker.appendChild(btn);
+    });
+
+    emojiBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
+    });
+    document.addEventListener('click', () => { picker.style.display = 'none'; });
+  }
+
   // ── Attach button ──────────────────────────────────────────────────────────
   if (!document.getElementById('file-attach-btn')) {
     const attachBtn = document.createElement('button');

@@ -20,5 +20,5 @@ class Base(DeclarativeBase):
 
 
 def init_db() -> None:
-    from . import user, session, room, message, attachment, social  # noqa: F401
+    from . import user, session, room, message, attachment, social, password_reset, unread  # noqa: F401  (unread has both UserRoomRead and UserDmRead)
     Base.metadata.create_all(bind=engine)

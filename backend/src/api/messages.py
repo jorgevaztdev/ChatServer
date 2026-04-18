@@ -10,6 +10,7 @@ from src.api.deps import get_db, get_current_user
 from src.models.attachment import Attachment
 from src.models.message import Message
 from src.models.room import RoomBan, RoomMembership, RoomRole
+from src.models.unread import UserRoomRead, UserDmRead
 from src.models.user import User
 from src.services.messaging import MAX_CONTENT_BYTES, build_payload, send_dm, send_room_message
 
@@ -230,3 +231,149 @@ async def send_dm_message(
         raise HTTPException(status_code=422, detail=str(e))
 
     return _serialize(msg, current_user.username, _reply_content(db, body.reply_to_id))
+
+
+# ── GET /dms/{user_id}/messages — DM history ─────────────────────────────────
+
+@router.get("/dms/{user_id}/messages")
+def list_dm_messages(
+    user_id: int,
+    before: int | None = Query(default=None),
+    limit: int = Query(default=50, le=100),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    other = db.query(User).filter(User.id == user_id).first()
+    if not other:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    query = (
+        db.query(Message, User.username)
+        .join(User, User.id == Message.sender_id)
+        .filter(
+            Message.room_id == None,  # noqa: E711
+            (
+                (Message.sender_id == current_user.id) & (Message.recipient_id == user_id)
+            ) | (
+                (Message.sender_id == user_id) & (Message.recipient_id == current_user.id)
+            ),
+        )
+    )
+    if before is not None:
+        query = query.filter(Message.id < before)
+
+    rows = query.order_by(Message.id.desc()).limit(limit).all()
+
+    result = []
+    for msg, username in rows:
+        rc = _reply_content(db, msg.reply_to_id)
+        result.append(_serialize(msg, username, rc))
+    return result
+
+
+# ── GET /dms/unread — unread DM counts per friend ────────────────────────────
+
+@router.get("/dms/unread")
+def get_dm_unread_counts(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    from src.models.social import Friendship, FriendshipStatus
+    from sqlalchemy import or_, and_
+
+    friendships = (
+        db.query(Friendship)
+        .filter(
+            Friendship.status == FriendshipStatus.accepted,
+            or_(
+                Friendship.requester_id == current_user.id,
+                Friendship.addressee_id == current_user.id,
+            ),
+        )
+        .all()
+    )
+    result = []
+    for f in friendships:
+        partner_id = f.addressee_id if f.requester_id == current_user.id else f.requester_id
+        read_row = (
+            db.query(UserDmRead)
+            .filter(UserDmRead.user_id == current_user.id, UserDmRead.partner_id == partner_id)
+            .first()
+        )
+        last_read_id = read_row.last_read_message_id if read_row else 0
+        unread_count = (
+            db.query(Message)
+            .filter(
+                Message.room_id == None,  # noqa: E711
+                Message.sender_id == partner_id,
+                Message.recipient_id == current_user.id,
+                Message.id > last_read_id,
+            )
+            .count()
+        )
+        result.append({"partner_id": partner_id, "unread_count": unread_count})
+    return result
+
+
+# ── POST /dms/{user_id}/read — mark DM as read ───────────────────────────────
+
+@router.post("/dms/{user_id}/read")
+def mark_dm_read(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    latest = (
+        db.query(Message)
+        .filter(
+            Message.room_id == None,  # noqa: E711
+            Message.sender_id == user_id,
+            Message.recipient_id == current_user.id,
+        )
+        .order_by(Message.id.desc())
+        .first()
+    )
+    latest_id = latest.id if latest else 0
+
+    row = (
+        db.query(UserDmRead)
+        .filter(UserDmRead.user_id == current_user.id, UserDmRead.partner_id == user_id)
+        .first()
+    )
+    if row:
+        row.last_read_message_id = latest_id
+    else:
+        db.add(UserDmRead(user_id=current_user.id, partner_id=user_id, last_read_message_id=latest_id))
+    db.commit()
+    return {"detail": "marked read"}
+
+
+# ── POST /rooms/{room_id}/read — mark room as read ────────────────────────────
+
+@router.post("/rooms/{room_id}/read")
+def mark_room_read(
+    room_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    _require_membership(room_id, current_user.id, db)
+
+    latest_msg = (
+        db.query(Message)
+        .filter(Message.room_id == room_id)
+        .order_by(Message.id.desc())
+        .first()
+    )
+    latest_id = latest_msg.id if latest_msg else 0
+
+    row = (
+        db.query(UserRoomRead)
+        .filter(UserRoomRead.user_id == current_user.id, UserRoomRead.room_id == room_id)
+        .first()
+    )
+    if row:
+        row.last_read_message_id = latest_id
+    else:
+        db.add(UserRoomRead(user_id=current_user.id, room_id=room_id, last_read_message_id=latest_id))
+    db.commit()
+    return {"detail": "marked read"}

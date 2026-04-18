@@ -1,327 +1,567 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="light" lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>Admin Dashboard — Neo-Nostalgia Chat</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <title>Neo-Nostalgia Chat Admin</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <style>
-    :root {
-      --bevel-out: inset 2px 2px 0px 0px #FFFFFF, inset -2px -2px 0px 0px #808080;
-      --bevel-in:  inset 2px 2px 0px 0px #808080, inset -2px -2px 0px 0px #FFFFFF;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Inter', sans-serif;
-      background: #005050;
-      min-height: 100vh;
-      display: flex;
+      font-family: 'IBM Plex Sans', sans-serif;
+      background-color: #008080;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+    .win95-outset {
+      border-top: 2px solid #ffffff;
+      border-left: 2px solid #ffffff;
+      border-bottom: 2px solid #000000;
+      border-right: 2px solid #000000;
+      box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px #808080;
+    }
+    .win95-inset {
+      border-top: 2px solid #808080;
+      border-left: 2px solid #808080;
+      border-bottom: 2px solid #ffffff;
+      border-right: 2px solid #ffffff;
+      background-color: #ffffff;
+    }
+    .win95-button {
+      border-top: 2px solid #ffffff;
+      border-left: 2px solid #ffffff;
+      border-bottom: 2px solid #000000;
+      border-right: 2px solid #000000;
+      background-color: #c0c0c0;
+      padding: 2px 6px;
+      cursor: pointer;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      gap: 4px;
     }
-    .win {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      max-width: 1100px;
-      background: #DFDFDF;
-      box-shadow: var(--bevel-out);
+    .win95-button:active {
+      border-top: 2px solid #000000;
+      border-left: 2px solid #000000;
+      border-bottom: 2px solid #ffffff;
+      border-right: 2px solid #ffffff;
+      padding: 3px 5px 1px 7px;
     }
-    .titlebar {
-      background: #000080;
-      color: #fff;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 6px;
-      flex-shrink: 0;
-      user-select: none;
+    .win95-button:disabled { opacity: 0.5; cursor: default; }
+    .material-symbols-outlined { font-size: 18px; vertical-align: middle; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .nav-active {
+      background-color: #c0c0c0;
+      border-top: 2px solid #000000;
+      border-left: 2px solid #000000;
+      border-bottom: 2px solid #ffffff;
+      border-right: 2px solid #ffffff;
+      font-weight: bold;
     }
-    .titlebar span { font-size: 13px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-    .titlebar-btns { display: flex; gap: 2px; }
-    .win-btn {
-      width: 18px; height: 16px;
-      background: #DFDFDF;
-      box-shadow: var(--bevel-out);
-      border: none; cursor: pointer;
-      font-size: 10px; font-weight: bold;
-      display: flex; align-items: center; justify-content: center;
+    .nav-inactive {
+      border-top: 2px solid #ffffff;
+      border-left: 2px solid #ffffff;
+      border-bottom: 2px solid #000000;
+      border-right: 2px solid #000000;
     }
-    .win-btn:active { box-shadow: var(--bevel-in); }
-
-    /* Menu bar */
-    .menubar {
-      background: #DFDFDF;
-      border-bottom: 1px solid #808080;
-      padding: 2px 6px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .menubar-title {
-      font-size: 12px;
-      font-weight: 700;
-      font-family: 'JetBrains Mono', monospace;
-      color: #000;
-      flex: 1;
-    }
-    .refresh-btn {
-      height: 24px;
-      padding: 0 12px;
-      background: #DFDFDF;
-      box-shadow: var(--bevel-out);
-      border: none;
-      cursor: pointer;
-      font-size: 12px;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 600;
-    }
-    .refresh-btn:active { box-shadow: var(--bevel-in); }
-    .status-pill {
-      font-size: 10px;
-      font-family: 'JetBrains Mono', monospace;
-      color: #808080;
-      padding: 1px 6px;
-      box-shadow: var(--bevel-in);
-    }
-
-    /* Body layout */
-    .app-body {
-      display: flex;
-      gap: 0;
-      min-height: 400px;
-      overflow: hidden;
-    }
-
-    /* Panels */
-    .panel {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      border-right: 2px solid #808080;
-    }
-    .panel:last-child { border-right: none; }
-    .panel-header {
-      background: #DFDFDF;
-      box-shadow: var(--bevel-out);
-      padding: 4px 10px;
-      font-size: 12px;
-      font-weight: 700;
-      font-family: 'JetBrains Mono', monospace;
-      border-bottom: 1px solid #808080;
-      flex-shrink: 0;
-    }
-    .panel-body { flex: 1; overflow-y: auto; padding: 4px; background: #fff; }
-
-    /* Tables */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    thead tr { background: #DFDFDF; }
-    thead th {
-      text-align: left;
-      padding: 4px 8px;
-      font-weight: 700;
-      border-bottom: 2px solid #808080;
-      white-space: nowrap;
-    }
-    tbody tr:nth-child(even) { background: #f6f8f8; }
-    tbody tr:hover { background: #e0e8ff; }
-    tbody td {
-      padding: 3px 8px;
-      border-bottom: 1px solid #e0e0e0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 200px;
-    }
-    .empty-row td {
-      color: #808080;
-      font-style: italic;
-      text-align: center;
-      padding: 16px;
-    }
-
-    /* Status bar */
-    .statusbar {
-      height: 22px;
-      background: #DFDFDF;
-      box-shadow: var(--bevel-out);
-      border-top: 1px solid #808080;
-      display: flex;
-      align-items: center;
-      padding: 0 6px;
-      font-size: 10px;
-      font-family: 'JetBrains Mono', monospace;
-      color: #808080;
-      flex-shrink: 0;
-      gap: 12px;
-    }
-    .status-cell { box-shadow: var(--bevel-in); padding: 1px 6px; }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 12px; background: #DFDFDF; border-left: 1px solid #808080; }
-    ::-webkit-scrollbar-thumb { background: #DFDFDF; box-shadow: var(--bevel-out); }
-    ::-webkit-scrollbar-button { display: block; height: 12px; background: #DFDFDF; box-shadow: var(--bevel-out); }
+    .nav-inactive:hover { background-color: #dfdfdf; }
+    tr.selected-row { background-color: #000080 !important; color: #fff; }
+    tr.selected-row td { color: #fff; }
+    ::-webkit-scrollbar { width: 12px; background: #c0c0c0; }
+    ::-webkit-scrollbar-thumb { background: #c0c0c0; border-top: 2px solid #fff; border-left: 2px solid #fff; border-bottom: 2px solid #000; border-right: 2px solid #000; }
   </style>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          borderRadius: { "DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px" },
+          fontFamily: { "body": ["IBM Plex Sans"], "mono": ["JetBrains Mono"] }
+        }
+      }
+    }
+  </script>
 </head>
-<body>
-  <div class="win">
-    <!-- Title bar -->
-    <div class="titlebar">
-      <span>Admin Dashboard</span>
-      <div class="titlebar-btns">
-        <button class="win-btn">_</button>
-        <button class="win-btn">&#9633;</button>
-        <button class="win-btn" onclick="window.history.back()">X</button>
-      </div>
-    </div>
+<body class="flex items-center justify-center p-4">
 
-    <!-- Menu bar -->
-    <div class="menubar">
-      <span class="menubar-title">XMPP Server Monitor</span>
-      <span class="status-pill" id="last-refresh">Never refreshed</span>
-      <button class="refresh-btn" onclick="refresh()">&#8635; Refresh</button>
-    </div>
+<!-- Main Window -->
+<div class="w-full max-w-6xl h-[870px] bg-[#c0c0c0] win95-outset flex flex-col overflow-hidden">
 
-    <!-- Main body -->
-    <div class="app-body">
-      <!-- Panel 1: Active XMPP Connections -->
-      <div class="panel">
-        <div class="panel-header">Active XMPP Connections (C2S)</div>
-        <div class="panel-body">
-          <table>
-            <thead>
-              <tr>
-                <th>JID</th>
-                <th>Msg In</th>
-                <th>Msg Out</th>
-                <th>Connected At</th>
-              </tr>
-            </thead>
-            <tbody id="connections-tbody">
-              <tr class="empty-row"><td colspan="4">Loading...</td></tr>
-            </tbody>
-          </table>
+  <!-- Title Bar -->
+  <header class="flex justify-between items-center w-full h-10 px-1 bg-[#c0c0c0] border-b-2 border-black">
+    <div class="text-sm font-bold px-2 py-1 bg-blue-900 text-white flex items-center h-7 gap-2">
+      <span class="material-symbols-outlined" style="font-size:14px;">terminal</span>
+      <span>ChatAdmin v1.0 — System Administration — [<span id="hdr-username">Super User</span>]</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button class="win95-button w-6 h-6 p-0"><span class="material-symbols-outlined text-sm">help</span></button>
+      <button class="win95-button w-6 h-6 p-0 font-bold">_</button>
+      <button class="win95-button w-6 h-6 p-0 font-bold" onclick="location.href='/pages/main-chat.html'">X</button>
+    </div>
+  </header>
+
+  <!-- Body -->
+  <div class="flex flex-1 overflow-hidden p-2 gap-2">
+
+    <!-- Sidebar -->
+    <aside class="bg-[#c0c0c0] border-r-2 border-black h-full w-52 flex flex-col p-2 space-y-1 flex-shrink-0">
+      <!-- Admin info -->
+      <div class="mb-3 p-2 win95-inset bg-gray-100 flex items-center gap-2">
+        <div class="w-10 h-10 win95-outset bg-[#000080] flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-white" style="font-size:22px;">shield_person</span>
+        </div>
+        <div>
+          <div class="font-bold text-xs uppercase" id="sidebar-username">Loading…</div>
+          <div class="text-[10px] text-gray-600">Super User</div>
         </div>
       </div>
 
-      <!-- Panel 2: Federation Links -->
-      <div class="panel">
-        <div class="panel-header">Federation Links (S2S)</div>
-        <div class="panel-body">
-          <table>
-            <thead>
-              <tr>
-                <th>Domain</th>
-                <th>Msg In</th>
-                <th>Msg Out</th>
-                <th>Connected At</th>
-              </tr>
-            </thead>
-            <tbody id="federation-tbody">
-              <tr class="empty-row"><td colspan="4">Loading...</td></tr>
-            </tbody>
-          </table>
+      <!-- Nav -->
+      <nav class="flex-1 flex flex-col space-y-1">
+        <button class="nav-active flex items-center gap-2 px-3 py-2 text-left w-full" data-section="users" onclick="switchSection('users', this)">
+          <span class="material-symbols-outlined" style="font-size:16px;">group</span>
+          <span class="text-xs">User Management</span>
+        </button>
+        <button class="nav-inactive flex items-center gap-2 px-3 py-2 text-left w-full" data-section="rooms" onclick="switchSection('rooms', this)">
+          <span class="material-symbols-outlined" style="font-size:16px;">forum</span>
+          <span class="text-xs">Chat Rooms</span>
+        </button>
+        <button class="nav-inactive flex items-center gap-2 px-3 py-2 text-left w-full" data-section="jabber" onclick="switchSection('jabber', this)">
+          <span class="material-symbols-outlined" style="font-size:16px;">terminal</span>
+          <span class="text-xs">XMPP / Jabber</span>
+        </button>
+      </nav>
+
+      <!-- Stats -->
+      <div class="pt-2 border-t border-gray-400">
+        <div class="p-2 win95-inset bg-gray-200 text-[10px] mono space-y-1">
+          <div class="font-bold mb-1">Server Status:</div>
+          <div class="flex justify-between"><span>Users:</span><span id="stat-users">—</span></div>
+          <div class="flex justify-between"><span>Admins:</span><span id="stat-admins">—</span></div>
+          <div class="flex justify-between"><span>Rooms:</span><span id="stat-rooms">—</span></div>
+          <div class="flex justify-between"><span>Messages:</span><span id="stat-messages">—</span></div>
+        </div>
+        <div class="mt-2 space-y-1">
+          <button class="nav-inactive flex items-center gap-2 px-3 py-1 text-left w-full text-red-800" onclick="location.href='/pages/main-chat.html'">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            <span class="text-xs">Back to Chat</span>
+          </button>
         </div>
       </div>
-    </div>
+    </aside>
 
-    <!-- Status bar -->
-    <div class="statusbar">
-      <span class="status-cell" id="status-connections">C2S: 0</span>
-      <span class="status-cell" id="status-federation">S2S: 0</span>
-      <span class="status-cell" id="status-domain">Domain: —</span>
-    </div>
+    <!-- Main Workspace -->
+    <main class="flex-1 flex flex-col gap-2 overflow-hidden min-w-0">
+
+      <!-- Toolbar -->
+      <div class="flex gap-2 mb-1 items-center">
+        <button class="win95-button text-xs font-bold" onclick="refreshAll()">↺ Refresh</button>
+        <div class="win95-inset px-2 py-0.5 text-[10px] mono flex-1" id="status-bar">Ready.</div>
+      </div>
+
+      <!-- ── SECTION: Users ── -->
+      <div id="section-users" class="flex-1 grid grid-cols-12 grid-rows-6 gap-2 min-h-0">
+
+        <!-- User table (main) -->
+        <section class="col-span-8 row-span-6 flex flex-col bg-[#c0c0c0] win95-outset p-1">
+          <div class="bg-blue-800 text-white text-[11px] px-2 py-0.5 font-bold mb-1 flex items-center justify-between">
+            <span>User Management</span>
+            <div class="flex gap-1">
+              <input id="user-search" class="win95-inset text-[10px] mono px-1 h-5 w-36 outline-none" placeholder="Search username / email…" type="text"/>
+              <button class="win95-button text-[10px]" onclick="loadUsers()">Go</button>
+            </div>
+          </div>
+          <div class="flex-1 win95-inset overflow-auto">
+            <table class="w-full text-xs border-collapse">
+              <thead class="bg-[#c0c0c0] sticky top-0 border-b border-gray-500">
+                <tr class="text-left">
+                  <th class="p-1 border-r border-gray-400 font-normal w-8">ID</th>
+                  <th class="p-1 border-r border-gray-400 font-normal">Username</th>
+                  <th class="p-1 border-r border-gray-400 font-normal">Email</th>
+                  <th class="p-1 border-r border-gray-400 font-normal w-16">Role</th>
+                  <th class="p-1 border-r border-gray-400 font-normal w-20">Created</th>
+                  <th class="p-1 font-normal w-28">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="user-tbody">
+                <tr><td colspan="6" class="p-4 text-center text-gray-500 italic">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Global Actions -->
+        <section class="col-span-4 row-span-3 flex flex-col bg-[#c0c0c0] win95-outset p-1">
+          <div class="bg-blue-800 text-white text-[11px] px-2 py-0.5 font-bold mb-2">Global Actions</div>
+          <div class="flex flex-col gap-2 p-2">
+            <button class="win95-button w-full justify-start py-2 text-xs" id="btn-promote" disabled onclick="promoteSelected()">
+              <span class="material-symbols-outlined" style="font-size:14px;">star</span> Make Admin
+            </button>
+            <button class="win95-button w-full justify-start py-2 text-xs" id="btn-demote" disabled onclick="demoteSelected()">
+              <span class="material-symbols-outlined" style="font-size:14px;">star_border</span> Remove Admin
+            </button>
+            <button class="win95-button w-full justify-start py-2 text-xs text-red-800" id="btn-delete" disabled onclick="deleteSelected()">
+              <span class="material-symbols-outlined" style="font-size:14px;">delete_forever</span> Delete User
+            </button>
+            <div class="text-[10px] text-gray-500 italic mt-1">Select a user row to enable actions.</div>
+          </div>
+        </section>
+
+        <!-- Selected user info -->
+        <section class="col-span-4 row-span-3 flex flex-col bg-[#c0c0c0] win95-outset p-1">
+          <div class="bg-gray-700 text-white text-[11px] px-2 py-0.5 font-bold mb-2">Selected User</div>
+          <div class="flex-1 win95-inset p-2 mono text-[10px] space-y-1" id="user-detail">
+            <div class="text-gray-500 italic">No user selected.</div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ── SECTION: Rooms ── -->
+      <div id="section-rooms" class="flex-1 grid grid-cols-12 grid-rows-6 gap-2 min-h-0 hidden">
+
+        <!-- Rooms table -->
+        <section class="col-span-12 row-span-6 flex flex-col bg-[#c0c0c0] win95-outset p-1">
+          <div class="bg-blue-800 text-white text-[11px] px-2 py-0.5 font-bold mb-1">
+            Chat Rooms
+          </div>
+          <div class="flex-1 win95-inset overflow-auto">
+            <table class="w-full text-xs border-collapse">
+              <thead class="bg-[#c0c0c0] sticky top-0 border-b border-gray-500">
+                <tr class="text-left">
+                  <th class="p-1 border-r border-gray-400 font-normal w-8">ID</th>
+                  <th class="p-1 border-r border-gray-400 font-normal">Name</th>
+                  <th class="p-1 border-r border-gray-400 font-normal">Description</th>
+                  <th class="p-1 border-r border-gray-400 font-normal w-16">Type</th>
+                  <th class="p-1 border-r border-gray-400 font-normal w-16">Members</th>
+                  <th class="p-1 border-r border-gray-400 font-normal w-20">Created</th>
+                  <th class="p-1 font-normal w-20">Owner ID</th>
+                </tr>
+              </thead>
+              <tbody id="rooms-tbody">
+                <tr><td colspan="7" class="p-4 text-center text-gray-500 italic">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ── SECTION: XMPP ── -->
+      <div id="section-jabber" class="flex-1 grid grid-cols-12 grid-rows-6 gap-2 min-h-0 hidden">
+
+        <!-- Jabber terminal -->
+        <section class="col-span-6 row-span-6 flex flex-col bg-[#c0c0c0] win95-outset p-1">
+          <div class="bg-gray-700 text-white text-[10px] px-2 py-0.5 flex justify-between">
+            <span class="mono">JABBER_C2S.EXE — Active Connections</span>
+            <span class="material-symbols-outlined" style="font-size:12px;">terminal</span>
+          </div>
+          <div class="flex-1 bg-black text-green-400 p-2 mono text-[10px] overflow-y-auto leading-tight" id="jabber-terminal">
+            <div class="text-gray-500 italic">[Initializing…]</div>
+          </div>
+        </section>
+
+        <!-- Federation -->
+        <section class="col-span-6 row-span-6 flex flex-col bg-[#c0c0c0] win95-outset p-1">
+          <div class="bg-red-900 text-white text-[11px] px-2 py-0.5 font-bold mb-1">Federation Links (S2S)</div>
+          <div class="flex-1 win95-inset overflow-auto">
+            <table class="w-full text-[10px] border-collapse">
+              <thead class="bg-gray-200 border-b border-gray-400 text-left">
+                <tr>
+                  <th class="p-1 border-r border-gray-300 font-normal">Domain</th>
+                  <th class="p-1 border-r border-gray-300 font-normal">Msg In</th>
+                  <th class="p-1 border-r border-gray-300 font-normal">Msg Out</th>
+                  <th class="p-1 font-normal">Connected At</th>
+                </tr>
+              </thead>
+              <tbody id="federation-tbody">
+                <tr><td colspan="4" class="p-4 text-center text-gray-500 italic">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+
+    </main>
   </div>
 
-  <script>
-    const API_BASE = '';
+  <!-- Status Footer -->
+  <footer class="h-6 bg-[#c0c0c0] win95-outset mt-1 flex items-center px-1 text-[10px] gap-2 flex-shrink-0">
+    <div class="win95-inset px-2 py-0.5 flex-1 flex items-center gap-2">
+      <span class="material-symbols-outlined" style="font-size:14px;">info</span>
+      <span id="footer-status">Ready. System Load: Normal.</span>
+    </div>
+    <div class="win95-inset px-4 py-0.5 w-28 text-center font-bold mono" id="clock">--:-- --</div>
+  </footer>
 
-    function fmtDate(iso) {
-      if (!iso) return '—';
-      try {
-        const d = new Date(iso);
-        return d.toLocaleTimeString();
-      } catch { return iso; }
+</div>
+
+<!-- Taskbar -->
+<div class="fixed bottom-0 left-0 right-0 h-10 bg-[#c0c0c0] win95-outset flex items-center p-1 z-10">
+  <button class="win95-button px-4 flex items-center gap-1 font-extrabold italic text-sm" onclick="location.href='/pages/main-chat.html'">
+    <div class="bg-[#000080] text-white p-0.5"><span class="material-symbols-outlined" style="font-size:12px;">grid_view</span></div>
+    Start
+  </button>
+  <div class="ml-4 flex gap-1 items-center h-full">
+    <div class="win95-button bg-[#dfdfdf] border-t-2 border-l-2 border-black border-b-2 border-white border-r-2 border-white px-3 text-xs flex items-center gap-1">
+      <span class="material-symbols-outlined" style="font-size:14px;">terminal</span>
+      System Administration
+    </div>
+  </div>
+  <div class="ml-auto win95-inset px-2 h-full flex items-center gap-3">
+    <span class="material-symbols-outlined" style="font-size:14px;">volume_up</span>
+    <span class="material-symbols-outlined" style="font-size:14px;">bolt</span>
+    <span class="text-xs font-bold mono" id="clock2">--:-- --</span>
+  </div>
+</div>
+
+<script>
+  const API = '';
+  let _users = [];
+  let _selectedId = null;
+  let _currentUserId = null;
+
+  // ── Auth guard ────────────────────────────────────────────────────────────
+  async function init() {
+    try {
+      const res = await fetch(`${API}/auth/me`, { credentials: 'include' });
+      if (!res.ok) { location.href = '/pages/login.html'; return; }
+      const me = await res.json();
+      if (!me.is_admin) { location.href = '/pages/main-chat.html'; return; }
+      _currentUserId = me.id;
+      document.getElementById('hdr-username').textContent = me.username;
+      document.getElementById('sidebar-username').textContent = me.username;
+    } catch { location.href = '/pages/login.html'; return; }
+    await refreshAll();
+    setInterval(updateClock, 1000);
+    updateClock();
+  }
+
+  // ── Section switching ─────────────────────────────────────────────────────
+  function switchSection(name, btn) {
+    ['users','rooms','jabber'].forEach(s => {
+      document.getElementById('section-' + s).classList.add('hidden');
+    });
+    document.querySelectorAll('aside nav button').forEach(b => {
+      b.className = b.className.replace('nav-active','nav-inactive');
+    });
+    document.getElementById('section-' + name).classList.remove('hidden');
+    btn.className = btn.className.replace('nav-inactive','nav-active');
+    if (name === 'jabber') loadXmpp();
+    if (name === 'rooms') loadRooms();
+  }
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const res = await fetch(`${API}/admin/stats`, { credentials: 'include' });
+      if (!res.ok) return;
+      const d = await res.json();
+      document.getElementById('stat-users').textContent = d.total_users;
+      document.getElementById('stat-admins').textContent = d.total_admins;
+      document.getElementById('stat-rooms').textContent = d.total_rooms;
+      document.getElementById('stat-messages').textContent = d.total_messages;
+    } catch {}
+  }
+
+  // ── Users ─────────────────────────────────────────────────────────────────
+  async function loadUsers() {
+    const q = document.getElementById('user-search').value.trim();
+    const url = q ? `${API}/admin/users?q=${encodeURIComponent(q)}` : `${API}/admin/users`;
+    setFooter('Loading users…');
+    try {
+      const res = await fetch(url, { credentials: 'include' });
+      if (!res.ok) { setFooter('Error loading users.'); return; }
+      const data = await res.json();
+      _users = data.users;
+      renderUsers();
+      setFooter(`Loaded ${data.total} users.`);
+    } catch (e) { setFooter(e.message); }
+  }
+
+  function renderUsers() {
+    const tbody = document.getElementById('user-tbody');
+    if (!_users.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500 italic">No users found.</td></tr>';
+      return;
     }
+    tbody.innerHTML = _users.map(u => {
+      const role = u.is_admin
+        ? '<span class="font-bold text-blue-800">Admin</span>'
+        : '<span class="text-gray-600">User</span>';
+      const created = new Date(u.created_at).toLocaleDateString();
+      const isSelf = u.id === _currentUserId;
+      return `<tr class="border-b border-gray-200 hover:bg-blue-100 cursor-pointer ${u.id === _selectedId ? 'selected-row' : ''}" onclick="selectUser(${u.id})">
+        <td class="p-1 border-r border-gray-200 mono">${u.id}</td>
+        <td class="p-1 border-r border-gray-200 font-bold">${esc(u.username)}${isSelf ? ' <span title="You" style="color:#000080">★</span>' : ''}</td>
+        <td class="p-1 border-r border-gray-200 mono text-[10px]">${esc(u.email)}</td>
+        <td class="p-1 border-r border-gray-200">${role}</td>
+        <td class="p-1 border-r border-gray-200 text-[10px]">${created}</td>
+        <td class="p-1">
+          <div class="flex gap-1">
+            ${!isSelf ? `<button class="win95-button text-[9px]" onclick="event.stopPropagation();quickDelete(${u.id},'${esc(u.username)}')">Delete</button>` : ''}
+            ${!u.is_admin && !isSelf ? `<button class="win95-button text-[9px]" onclick="event.stopPropagation();quickPromote(${u.id},'${esc(u.username)}')">Make Admin</button>` : ''}
+            ${u.is_admin && !isSelf ? `<button class="win95-button text-[9px]" onclick="event.stopPropagation();quickDemote(${u.id},'${esc(u.username)}')">Rem. Admin</button>` : ''}
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
 
-    function renderConnections(data) {
-      const tbody = document.getElementById('connections-tbody');
-      if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No active connections</td></tr>';
-        document.getElementById('status-connections').textContent = 'C2S: 0';
+  function selectUser(id) {
+    _selectedId = id;
+    renderUsers();
+    const u = _users.find(u => u.id === id);
+    if (!u) return;
+    const isSelf = id === _currentUserId;
+    document.getElementById('user-detail').innerHTML = `
+      <div><b>ID:</b> ${u.id}</div>
+      <div><b>Username:</b> ${esc(u.username)}</div>
+      <div><b>Email:</b> ${esc(u.email)}</div>
+      <div><b>Role:</b> ${u.is_admin ? 'ADMIN' : 'User'}</div>
+      <div><b>Created:</b> ${new Date(u.created_at).toLocaleString()}</div>
+      ${isSelf ? '<div class="text-yellow-700 mt-2">★ This is your account.</div>' : ''}
+    `;
+    document.getElementById('btn-delete').disabled = isSelf;
+    document.getElementById('btn-promote').disabled = u.is_admin;
+    document.getElementById('btn-demote').disabled = !u.is_admin || isSelf;
+  }
+
+  async function quickDelete(id, name) {
+    if (!confirm(`Delete user "${name}"?\nThis is permanent.`)) return;
+    try {
+      const res = await fetch(`${API}/admin/users/${id}`, { method: 'DELETE', credentials: 'include' });
+      if (!res.ok) { const d = await res.json(); setFooter(d.detail); return; }
+      setFooter(`Deleted ${name}.`);
+      if (_selectedId === id) { _selectedId = null; document.getElementById('user-detail').innerHTML = '<div class="text-gray-500 italic">No user selected.</div>'; }
+      await Promise.all([loadStats(), loadUsers()]);
+    } catch (e) { setFooter(e.message); }
+  }
+
+  async function quickPromote(id, name) {
+    if (!confirm(`Make "${name}" an admin?`)) return;
+    try {
+      const res = await fetch(`${API}/admin/users/${id}/promote`, { method: 'POST', credentials: 'include' });
+      if (!res.ok) { const d = await res.json(); setFooter(d.detail); return; }
+      setFooter(`${name} promoted to admin.`);
+      await Promise.all([loadStats(), loadUsers()]);
+      selectUser(id);
+    } catch (e) { setFooter(e.message); }
+  }
+
+  async function quickDemote(id, name) {
+    if (!confirm(`Remove admin role from "${name}"?`)) return;
+    try {
+      const res = await fetch(`${API}/admin/users/${id}/promote`, { method: 'DELETE', credentials: 'include' });
+      if (!res.ok) { const d = await res.json(); setFooter(d.detail); return; }
+      setFooter(`${name} demoted.`);
+      await Promise.all([loadStats(), loadUsers()]);
+      selectUser(id);
+    } catch (e) { setFooter(e.message); }
+  }
+
+  // Sidebar action buttons (operate on _selectedId)
+  function promoteSelected() { const u = _users.find(u => u.id === _selectedId); if (u) quickPromote(u.id, u.username); }
+  function demoteSelected()  { const u = _users.find(u => u.id === _selectedId); if (u) quickDemote(u.id, u.username); }
+  function deleteSelected()  { const u = _users.find(u => u.id === _selectedId); if (u) quickDelete(u.id, u.username); }
+
+  // ── Rooms ─────────────────────────────────────────────────────────────────
+  async function loadRooms() {
+    setFooter('Loading rooms…');
+    try {
+      const res = await fetch(`${API}/rooms?limit=100`, { credentials: 'include' });
+      if (!res.ok) { setFooter('Error loading rooms.'); return; }
+      const rooms = await res.json();
+      const tbody = document.getElementById('rooms-tbody');
+      if (!rooms.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gray-500 italic">No rooms.</td></tr>';
         return;
       }
-      tbody.innerHTML = data.map(row => `
-        <tr>
-          <td title="${row.jid}">${row.jid}</td>
-          <td>${row.messages_in}</td>
-          <td>${row.messages_out}</td>
-          <td>${fmtDate(row.connected_at)}</td>
-        </tr>
-      `).join('');
-      document.getElementById('status-connections').textContent = `C2S: ${data.length}`;
-    }
+      tbody.innerHTML = rooms.map(r => `
+        <tr class="border-b border-gray-200 hover:bg-blue-100">
+          <td class="p-1 border-r border-gray-200 mono">${r.id}</td>
+          <td class="p-1 border-r border-gray-200 font-bold">${esc(r.name)}</td>
+          <td class="p-1 border-r border-gray-200 text-[10px] text-gray-600">${esc(r.description || '—')}</td>
+          <td class="p-1 border-r border-gray-200">${r.is_private ? '<span class="text-red-700">Private</span>' : 'Public'}</td>
+          <td class="p-1 border-r border-gray-200 text-center">${r.member_count}</td>
+          <td class="p-1 border-r border-gray-200 text-[10px]">${new Date(r.created_at).toLocaleDateString()}</td>
+          <td class="p-1 mono text-[10px]">#${r.owner_id}</td>
+        </tr>`).join('');
+      setFooter(`Loaded ${rooms.length} rooms.`);
+    } catch (e) { setFooter(e.message); }
+  }
 
-    function renderFederation(data) {
-      const tbody = document.getElementById('federation-tbody');
-      if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No active federation links</td></tr>';
-        document.getElementById('status-federation').textContent = 'S2S: 0';
-        return;
+  // ── XMPP ─────────────────────────────────────────────────────────────────
+  async function loadXmpp() {
+    setFooter('Polling XMPP…');
+    try {
+      const [connRes, fedRes] = await Promise.all([
+        fetch(`${API}/admin/jabber/connections`, { credentials: 'include' }),
+        fetch(`${API}/admin/jabber/federation`, { credentials: 'include' }),
+      ]);
+
+      // Terminal
+      const term = document.getElementById('jabber-terminal');
+      if (connRes.ok) {
+        const conns = await connRes.json();
+        if (!conns.length) {
+          term.innerHTML = '<div>[SYSTEM] No active C2S connections.</div><div class="animate-pulse">_</div>';
+        } else {
+          term.innerHTML = '<div>[SYSTEM] Jabber C2S Active Sessions:</div>' +
+            conns.map(c => `<div>[C2S] ${c.jid} — in:${c.messages_in} out:${c.messages_out}</div>`).join('') +
+            '<div class="animate-pulse mt-1">_</div>';
+        }
       }
-      tbody.innerHTML = data.map(row => `
-        <tr>
-          <td title="${row.domain}">${row.domain}</td>
-          <td>${row.messages_in}</td>
-          <td>${row.messages_out}</td>
-          <td>${fmtDate(row.connected_at)}</td>
-        </tr>
-      `).join('');
-      document.getElementById('status-federation').textContent = `S2S: ${data.length}`;
-    }
 
-    async function refresh() {
-      try {
-        const [connRes, fedRes] = await Promise.all([
-          fetch(`${API_BASE}/admin/jabber/connections`, { credentials: 'include' }),
-          fetch(`${API_BASE}/admin/jabber/federation`, { credentials: 'include' })
-        ]);
-
-        if (connRes.status === 401 || fedRes.status === 401) {
-          window.location.href = '/pages/login.html';
-          return;
+      // Federation table
+      if (fedRes.ok) {
+        const fed = await fedRes.json();
+        const tbody = document.getElementById('federation-tbody');
+        if (!fed.length) {
+          tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500 italic">No active federation links.</td></tr>';
+        } else {
+          tbody.innerHTML = fed.map(f => `
+            <tr class="border-b border-gray-200">
+              <td class="p-1 border-r border-gray-200 mono">${esc(f.domain)}</td>
+              <td class="p-1 border-r border-gray-200 text-center">${f.messages_in}</td>
+              <td class="p-1 border-r border-gray-200 text-center">${f.messages_out}</td>
+              <td class="p-1 mono text-[10px]">${f.connected_at ? new Date(f.connected_at).toLocaleTimeString() : '—'}</td>
+            </tr>`).join('');
         }
-
-        if (connRes.ok) {
-          const data = await connRes.json();
-          renderConnections(data);
-        }
-
-        if (fedRes.ok) {
-          const data = await fedRes.json();
-          renderFederation(data);
-        }
-
-        const now = new Date();
-        document.getElementById('last-refresh').textContent =
-          `Last refresh: ${now.toLocaleTimeString()}`;
-      } catch (err) {
-        console.error('Refresh error:', err);
-        document.getElementById('last-refresh').textContent = 'Error refreshing';
       }
-    }
+      setFooter('XMPP data refreshed.');
+    } catch (e) { setFooter(e.message); }
+  }
 
-    // Auto-refresh every 5 seconds
-    refresh();
-    setInterval(refresh, 5000);
-  </script>
+  // ── Refresh all ───────────────────────────────────────────────────────────
+  async function refreshAll() {
+    await Promise.all([loadStats(), loadUsers()]);
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function setFooter(msg) {
+    document.getElementById('footer-status').textContent = msg;
+    document.getElementById('status-bar').textContent = msg;
+  }
+
+  function updateClock() {
+    const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('clock').textContent = t;
+    document.getElementById('clock2').textContent = t;
+  }
+
+  document.getElementById('user-search').addEventListener('keydown', e => {
+    if (e.key === 'Enter') loadUsers();
+  });
+
+  init();
+</script>
 </body>
 </html>

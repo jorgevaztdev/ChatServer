@@ -21,15 +21,18 @@
     .app-body { display: flex; flex: 1; overflow: hidden; }
     /* ── Left sidebar ── */
     .sidebar-left { width: 200px; background: #f6f8f8; border-right: 2px solid #808080; display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; }
-    .sidebar-header { background: #DFDFDF; box-shadow: var(--bevel-out); padding: 4px 8px; font-size: 11px; font-weight: 700; border-bottom: 1px solid #808080; display: flex; align-items: center; justify-content: space-between; }
-    #room-list { flex: 1; overflow-y: auto; padding: 2px 0; }
+    .sidebar-section { background: #DFDFDF; box-shadow: var(--bevel-out); padding: 4px 8px; font-size: 11px; font-weight: 700; border-bottom: 1px solid #808080; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+    .sidebar-section:hover { background: #c8c8c8; }
+    #room-list { overflow-y: auto; padding: 2px 0; flex: 1; min-height: 60px; }
+    #dm-list   { overflow-y: auto; padding: 2px 0; max-height: 160px; }
     .room-item { padding: 4px 10px; font-size: 12px; font-family: 'JetBrains Mono', monospace; cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .room-item:hover { background: #000080; color: #fff; }
     .room-item.active { background: #000080; color: #fff; }
+    .unread-badge { margin-left: auto; background: #cc0000; color: #fff; font-size: 9px; font-weight: 700; border-radius: 8px; padding: 0 4px; min-width: 16px; text-align: center; line-height: 14px; flex-shrink: 0; }
     .sidebar-footer { padding: 4px; border-top: 1px solid #808080; flex-shrink: 0; }
     /* ── Center chat ── */
     .chat-area { flex: 1; display: flex; flex-direction: column; background: #fff; overflow: hidden; min-width: 0; }
-    .chat-header { background: #DFDFDF; box-shadow: var(--bevel-out); padding: 4px 10px; font-size: 12px; font-weight: 600; border-bottom: 1px solid #808080; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .chat-header { background: #DFDFDF; box-shadow: var(--bevel-out); padding: 4px 10px; font-size: 12px; font-weight: 600; border-bottom: 1px solid #808080; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 8px; }
     #messages { flex: 1; overflow-y: auto; padding: 10px 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; scroll-behavior: smooth; }
     .chat-msg { margin-bottom: 5px; line-height: 1.5; }
     .chat-msg .who { color: #000080; font-weight: 700; cursor: default; }
@@ -37,7 +40,7 @@
     .chat-msg .msg-content { color: #0D0D0D; word-break: break-word; }
     .system-msg { color: #808080; font-style: italic; margin-bottom: 4px; }
     #scroll-sentinel { height: 1px; margin-bottom: 8px; }
-    .chat-input-bar { background: #DFDFDF; border-top: 2px solid #808080; display: flex; align-items: center; gap: 6px; padding: 6px 8px; flex-shrink: 0; }
+    .chat-input-bar { background: #DFDFDF; border-top: 2px solid #808080; display: flex; align-items: center; gap: 6px; padding: 6px 8px; flex-shrink: 0; position: relative; }
     #msg-input { flex: 1; height: 40px; box-shadow: var(--bevel-in); background: #fff; border: none; padding: 0 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none; resize: none; }
     #msg-input:focus { outline: 1px dotted #17cfcf; }
     .send-btn { height: 36px; padding: 0 14px; background: #DFDFDF; box-shadow: var(--bevel-out); border: none; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap; }
@@ -80,6 +83,10 @@
     .os-checkbox { appearance: none; width: 14px; height: 14px; background: #fff; box-shadow: var(--bevel-in); position: relative; cursor: pointer; flex-shrink: 0; }
     .os-checkbox:checked::before { content: ''; position: absolute; top: 1px; left: 3px; width: 5px; height: 9px; border: solid #0D0D0D; border-width: 0 2px 2px 0; transform: rotate(45deg); }
     .error-inline { font-size: 11px; color: #800000; font-family: 'JetBrains Mono', monospace; min-height: 14px; }
+    /* ── Manage room btn ── */
+    #manage-room-btn { display: none; height: 24px; padding: 0 8px; background: #DFDFDF; box-shadow: var(--bevel-out); border: none; cursor: pointer; font-size: 11px; }
+    #manage-room-btn:active { box-shadow: var(--bevel-in); }
+    #manage-room-btn.visible { display: block; }
   </style>
 </head>
 <body>
@@ -95,13 +102,21 @@
   </div>
 
   <div class="app-body">
-    <!-- Left: room list -->
+    <!-- Left: room list + DM list -->
     <div class="sidebar-left">
-      <div class="sidebar-header">
+      <!-- Channels section -->
+      <div class="sidebar-section" id="channels-toggle">
         <span>Channels</span>
-        <a href="room-catalog.html" style="font-size:10px;color:#000080;text-decoration:none;">[Browse]</a>
+        <a href="room-catalog.html" style="font-size:10px;color:#000080;text-decoration:none;" onclick="event.stopPropagation()">[Browse]</a>
       </div>
       <div id="room-list"><div class="room-item" style="color:#808080;">Loading…</div></div>
+
+      <!-- DMs section -->
+      <div class="sidebar-section" id="dms-toggle">
+        <span>Direct Messages</span>
+      </div>
+      <div id="dm-list"><div class="room-item" style="color:#808080;font-size:11px;">No friends yet</div></div>
+
       <div class="sidebar-footer">
         <button class="send-btn" style="width:100%;font-size:11px;" id="new-room-btn">+ New Room</button>
       </div>
@@ -110,7 +125,9 @@
     <!-- Center: messages -->
     <div class="chat-area">
       <div class="chat-header">
-        <span id="room-title" style="font-family:'JetBrains Mono',monospace;"># select a channel</span>
+        <span id="room-title" style="font-family:'JetBrains Mono',monospace;flex:1;"># select a channel</span>
+        <button id="manage-room-btn" title="Room management">⚙ Manage</button>
+        <button class="profile-btn" id="admin-btn" title="Admin Dashboard" style="display:none;" onclick="location.href='/pages/admin-dashboard.html'">🛡 Admin</button>
         <button class="profile-btn" id="profile-btn">⚙ <span id="username-label">…</span></button>
       </div>
       <div id="messages">
@@ -130,7 +147,7 @@
 
     <!-- Right: members -->
     <div class="sidebar-right">
-      <div class="sidebar-header" style="font-size:11px;">Members</div>
+      <div class="sidebar-header" style="background:#DFDFDF;box-shadow:var(--bevel-out);padding:4px 8px;font-size:11px;font-weight:700;border-bottom:1px solid #808080;">Members</div>
       <div id="user-list"></div>
     </div>
   </div>
@@ -152,6 +169,7 @@
       <div><strong>Username:</strong> <span id="pm-username" style="font-family:'JetBrains Mono',monospace;"></span></div>
       <div><strong>Email:</strong> <span id="pm-email" style="font-family:'JetBrains Mono',monospace;font-size:11px;"></span></div>
       <hr style="border-color:#808080;"/>
+      <button class="modal-btn" id="sessions-btn" style="text-align:left;">Manage Sessions…</button>
       <button class="modal-btn" id="logout-btn" style="text-align:left;">Log Out</button>
       <button class="modal-btn" id="delete-btn" style="text-align:left;color:#cc0000;">Delete Account…</button>
     </div>
@@ -203,12 +221,17 @@
 <script type="module">
   import * as msgList from '../components/message-list.js';
   import * as msgInput from '../components/message-input.js';
+  import { openRoomManagement } from '../components/moderation-modal.js';
 
   // ── State ─────────────────────────────────────────────────────────────────
   let currentUser = null;
   let currentRoomId = null;
+  let currentDmUserId = null;  // non-null when in DM mode
   let roomWs = null;
   let sentinelCtrl = null;
+  let unreadCounts = {};       // roomId -> count
+  let dmUnreadCounts = {};     // partnerId -> count
+  let friendsList = [];
 
   // ── Boot ──────────────────────────────────────────────────────────────────
   async function boot() {
@@ -221,6 +244,9 @@
     document.getElementById('username-label').textContent = currentUser.username;
     document.getElementById('pm-username').textContent = currentUser.username;
     document.getElementById('pm-email').textContent = currentUser.email;
+    if (currentUser.is_admin) {
+      document.getElementById('admin-btn').style.display = '';
+    }
 
     msgList.init({
       currentUserId: currentUser.id,
@@ -229,9 +255,11 @@
       onDelete: handleDelete,
     });
 
-    await loadRoomList();
+    await Promise.all([loadRoomList(), loadFriendList(), refreshDmUnread()]);
     clockTick();
     setInterval(clockTick, 1000);
+    setInterval(refreshUnread, 30000);
+    setInterval(refreshDmUnread, 30000);
 
     // auto-join room from URL param
     const params = new URLSearchParams(location.search);
@@ -245,11 +273,86 @@
       new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
+  // ── Unread counts ─────────────────────────────────────────────────────────
+  async function refreshUnread() {
+    const res = await fetch('/rooms/unread', { credentials: 'include' }).catch(() => null);
+    if (!res || !res.ok) return;
+    const data = await res.json();
+    unreadCounts = {};
+    data.forEach(({ room_id, unread_count }) => {
+      unreadCounts[room_id] = unread_count;
+    });
+    renderUnreadBadges();
+  }
+
+  function renderUnreadBadges() {
+    document.querySelectorAll('.room-item[data-id]').forEach(el => {
+      const rid = parseInt(el.dataset.id);
+      const count = unreadCounts[rid] || 0;
+      let badge = el.querySelector('.unread-badge');
+      if (count > 0 && !el.classList.contains('active')) {
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'unread-badge';
+          el.appendChild(badge);
+        }
+        badge.textContent = count > 99 ? '99+' : String(count);
+      } else {
+        badge?.remove();
+      }
+    });
+  }
+
+  async function markRoomRead(roomId) {
+    await fetch(`/rooms/${roomId}/read`, { method: 'POST', credentials: 'include' }).catch(() => null);
+    unreadCounts[roomId] = 0;
+    renderUnreadBadges();
+  }
+
+  // ── DM unread counts ──────────────────────────────────────────────────────
+  async function refreshDmUnread() {
+    const res = await fetch('/dms/unread', { credentials: 'include' }).catch(() => null);
+    if (!res || !res.ok) return;
+    const data = await res.json();
+    dmUnreadCounts = {};
+    data.forEach(({ partner_id, unread_count }) => {
+      dmUnreadCounts[partner_id] = unread_count;
+    });
+    renderDmUnreadBadges();
+  }
+
+  function renderDmUnreadBadges() {
+    document.querySelectorAll('.room-item[data-dm-user-id]').forEach(el => {
+      const uid = parseInt(el.dataset.dmUserId);
+      const count = dmUnreadCounts[uid] || 0;
+      let badge = el.querySelector('.unread-badge');
+      if (count > 0 && !el.classList.contains('active')) {
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'unread-badge';
+          el.appendChild(badge);
+        }
+        badge.textContent = count > 99 ? '99+' : String(count);
+      } else {
+        badge?.remove();
+      }
+    });
+  }
+
+  async function markDmRead(partnerId) {
+    await fetch(`/dms/${partnerId}/read`, { method: 'POST', credentials: 'include' }).catch(() => null);
+    dmUnreadCounts[partnerId] = 0;
+    renderDmUnreadBadges();
+  }
+
   // ── Room list ─────────────────────────────────────────────────────────────
   async function loadRoomList() {
-    const res = await fetch('/rooms', { credentials: 'include' }).catch(() => null);
-    if (!res || !res.ok) return;
-    const rooms = await res.json();
+    const [roomsRes] = await Promise.all([
+      fetch('/rooms', { credentials: 'include' }).catch(() => null),
+      refreshUnread(),
+    ]);
+    if (!roomsRes || !roomsRes.ok) return;
+    const rooms = await roomsRes.json();
     const container = document.getElementById('room-list');
     container.innerHTML = '';
     if (!rooms.length) {
@@ -260,57 +363,156 @@
       const item = document.createElement('div');
       item.className = 'room-item';
       item.dataset.id = r.id;
-      item.textContent = '# ' + r.name;
+      const label = document.createElement('span');
+      label.textContent = '# ' + r.name;
+      label.style.flex = '1';
+      label.style.overflow = 'hidden';
+      label.style.textOverflow = 'ellipsis';
+      item.appendChild(label);
       item.addEventListener('click', () => selectRoom(r.id, r.name));
       container.appendChild(item);
     });
+    renderUnreadBadges();
+  }
+
+  // ── Friend / DM list ──────────────────────────────────────────────────────
+  async function loadFriendList() {
+    const res = await fetch('/friends', { credentials: 'include' }).catch(() => null);
+    if (!res || !res.ok) return;
+    friendsList = await res.json();
+    const container = document.getElementById('dm-list');
+    container.innerHTML = '';
+    if (!friendsList.length) {
+      container.innerHTML = '<div class="room-item" style="color:#808080;font-size:11px;">No friends yet</div>';
+      return;
+    }
+    friendsList.forEach(f => {
+      const item = document.createElement('div');
+      item.className = 'room-item';
+      item.dataset.dmUserId = f.user_id;
+      const dot = document.createElement('span');
+      dot.className = 'presence-dot';
+      dot.style.background = f.presence === 'online' ? '#008000' : '#808080';
+      dot.style.flexShrink = '0';
+      const name = document.createElement('span');
+      name.textContent = f.username;
+      name.style.flex = '1';
+      name.style.overflow = 'hidden';
+      name.style.textOverflow = 'ellipsis';
+      item.appendChild(dot);
+      item.appendChild(name);
+      item.addEventListener('click', () => selectDm(f.user_id, f.username));
+      container.appendChild(item);
+    });
+    renderDmUnreadBadges();
   }
 
   // ── Select room ───────────────────────────────────────────────────────────
   async function selectRoom(roomId, roomName) {
-    if (currentRoomId === roomId) return;
+    if (currentRoomId === roomId && !currentDmUserId) return;
+    currentDmUserId = null;
     currentRoomId = roomId;
 
-    // highlight active
     document.querySelectorAll('.room-item').forEach(el => {
-      el.classList.toggle('active', parseInt(el.dataset.id) === roomId);
+      el.classList.toggle('active',
+        (el.dataset.id && parseInt(el.dataset.id) === roomId) ? true : false);
     });
+    document.querySelectorAll('.room-item[data-dm-user-id]').forEach(el => el.classList.remove('active'));
 
-    // disconnect previous WS
     if (roomWs) { roomWs.close(); roomWs = null; }
     if (sentinelCtrl) { sentinelCtrl.disconnect(); sentinelCtrl = null; }
 
-    // update header
     const name = roomName || ('room #' + roomId);
     document.getElementById('room-title').textContent = '# ' + name;
     setStatus('Loading…');
 
-    // clear messages, add sentinel
+    // show manage button — fetch room detail to get owner info
+    fetch(`/rooms/${roomId}`, { credentials: 'include' })
+      .then(r => r.json())
+      .then(room => {
+        const btn = document.getElementById('manage-room-btn');
+        const isOwner = room.owner_id === currentUser?.id;
+        const isMember = true; // we are member since we can see it
+        if (isOwner || isMember) {
+          btn.classList.add('visible');
+          btn.onclick = () => openRoomManagement({
+            roomId: room.id,
+            roomName: room.name,
+            ownerId: room.owner_id,
+            currentUserId: currentUser.id,
+            isOwner,
+            onDone: () => {
+              loadRoomList();
+              if (document.getElementById('room-title').textContent.startsWith('# ')) {
+                // room might have been deleted
+              }
+            },
+          });
+        }
+      }).catch(() => {});
+
     msgList.clearMessages();
     const sentinel = document.createElement('div');
     sentinel.id = 'scroll-sentinel';
     document.getElementById('messages').prepend(sentinel);
 
-    // fetch initial messages
     const initialMsgs = await fetchMessages(roomId, null);
     let oldestId = null;
     if (initialMsgs.length) {
       oldestId = msgList.prependMessages(initialMsgs);
     }
 
-    // attach infinite scroll
     sentinelCtrl = msgList.attachSentinel(sentinel);
     if (oldestId !== null) sentinelCtrl.setOldestId(oldestId);
 
-    // scroll to bottom
     const msgEl = document.getElementById('messages');
     msgEl.scrollTop = msgEl.scrollHeight;
 
-    // load members
     loadMembers(roomId);
-
-    // connect room WS
     connectRoomWs(roomId);
+    markRoomRead(roomId);
+  }
+
+  // ── Select DM ─────────────────────────────────────────────────────────────
+  async function selectDm(userId, username) {
+    if (currentDmUserId === userId) return;
+    currentDmUserId = userId;
+    currentRoomId = null;
+
+    document.querySelectorAll('.room-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.dmUserId && parseInt(el.dataset.dmUserId) === userId);
+    });
+
+    if (roomWs) { roomWs.close(); roomWs = null; }
+    if (sentinelCtrl) { sentinelCtrl.disconnect(); sentinelCtrl = null; }
+
+    document.getElementById('room-title').textContent = '@ ' + username;
+    document.getElementById('manage-room-btn').classList.remove('visible');
+    setStatus('DM mode');
+
+    msgList.clearMessages();
+    const sentinel = document.createElement('div');
+    sentinel.id = 'scroll-sentinel';
+    document.getElementById('messages').prepend(sentinel);
+
+    const initialMsgs = await fetchDmMessages(userId, null);
+    let oldestId = null;
+    if (initialMsgs.length) {
+      oldestId = msgList.prependMessages(initialMsgs);
+    }
+
+    sentinelCtrl = msgList.attachSentinel(sentinel);
+    if (oldestId !== null) sentinelCtrl.setOldestId(oldestId);
+
+    const msgEl = document.getElementById('messages');
+    msgEl.scrollTop = msgEl.scrollHeight;
+
+    document.getElementById('user-list').innerHTML = '';
+
+    markDmRead(userId);
+
+    // Enable input in DM mode via WS — connect to user WS (global)
+    connectUserWs(userId, username);
   }
 
   async function fetchMessages(roomId, beforeId) {
@@ -321,7 +523,16 @@
     return res.json();
   }
 
+  async function fetchDmMessages(userId, beforeId) {
+    let url = `/dms/${userId}/messages?limit=50`;
+    if (beforeId) url += `&before=${beforeId}`;
+    const res = await fetch(url, { credentials: 'include' }).catch(() => null);
+    if (!res || !res.ok) return [];
+    return res.json();
+  }
+
   async function fetchOlderMessages(beforeId) {
+    if (currentDmUserId) return fetchDmMessages(currentDmUserId, beforeId);
     if (!currentRoomId) return [];
     return fetchMessages(currentRoomId, beforeId);
   }
@@ -331,23 +542,58 @@
     const res = await fetch(`/rooms/${roomId}/members`, { credentials: 'include' }).catch(() => null);
     if (!res || !res.ok) return;
     const members = await res.json();
+    // Refresh friend list for accurate "already friend" detection
+    await loadFriendList();
+    const friendIds = new Set(friendsList.map(f => f.user_id));
     const container = document.getElementById('user-list');
     container.innerHTML = '';
     members.forEach(m => {
       const item = document.createElement('div');
       item.className = 'user-item';
+      item.style.cssText = 'position:relative;';
       const dot = document.createElement('span');
       dot.className = 'presence-dot';
       dot.style.background = m.online ? '#008000' : '#808080';
       const name = document.createElement('span');
       name.textContent = m.username + (m.role === 'admin' ? ' ★' : '');
+      name.style.flex = '1';
       item.appendChild(dot);
       item.appendChild(name);
+
+      // Add-friend button for non-self, non-friend members
+      if (m.user_id !== currentUser?.id && !friendIds.has(m.user_id)) {
+        const addBtn = document.createElement('button');
+        addBtn.title = 'Send friend request';
+        addBtn.textContent = '+';
+        addBtn.style.cssText = 'display:none;background:#DFDFDF;border:none;cursor:pointer;font-size:11px;font-weight:700;padding:0 3px;box-shadow:inset 2px 2px 0 #fff,inset -2px -2px 0 #808080;color:#000080;flex-shrink:0;';
+        addBtn.addEventListener('click', async e => {
+          e.stopPropagation();
+          addBtn.disabled = true;
+          const r = await fetch('/friends/request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ username: m.username }),
+          });
+          if (r.ok) {
+            addBtn.textContent = '✓';
+            addBtn.style.color = '#008000';
+          } else {
+            const d = await r.json().catch(() => ({}));
+            addBtn.title = d.detail || 'Error';
+            addBtn.disabled = false;
+          }
+        });
+        item.addEventListener('mouseenter', () => { addBtn.style.display = 'block'; });
+        item.addEventListener('mouseleave', () => { addBtn.style.display = 'none'; });
+        item.appendChild(addBtn);
+      }
+
       container.appendChild(item);
     });
   }
 
-  // ── Room WebSocket (T054) ─────────────────────────────────────────────────
+  // ── Room WebSocket ────────────────────────────────────────────────────────
   function connectRoomWs(roomId) {
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
     const ws = new WebSocket(`${proto}://${location.host}/ws/rooms/${roomId}`);
@@ -357,6 +603,7 @@
       setStatus('● connected');
       document.getElementById('msg-input').disabled = false;
       document.getElementById('send-btn').disabled = false;
+      document.getElementById('msg-input').placeholder = 'Type a message… (Enter to send, Shift+Enter for newline)';
       msgInput.init({
         ws,
         roomId,
@@ -368,11 +615,20 @@
       let msg;
       try { msg = JSON.parse(e.data); } catch { return; }
       switch (msg.type) {
-        case 'message:new':    msgList.appendMessage(msg.payload); break;
+        case 'message:new':    msgList.appendMessage(msg.payload); markRoomRead(roomId); break;
         case 'message:edited': msgList.updateMessage(msg.payload); break;
         case 'message:deleted': msgList.removeMessage(msg.payload.id); break;
         case 'presence:update': loadMembers(roomId); break;
-        case 'room:joined': break; // ack
+        case 'room:deleted':
+          if (msg.payload?.room_id === currentRoomId) {
+            msgList.clearMessages();
+            document.getElementById('room-title').textContent = '# (room deleted)';
+            document.getElementById('manage-room-btn').classList.remove('visible');
+            currentRoomId = null;
+          }
+          loadRoomList();
+          break;
+        case 'room:joined': break;
         case 'error': setStatus('Error: ' + msg.payload?.detail); break;
       }
     });
@@ -381,7 +637,36 @@
       setStatus('● disconnected — reconnecting…');
       document.getElementById('msg-input').disabled = true;
       document.getElementById('send-btn').disabled = true;
-      setTimeout(() => { if (currentRoomId === roomId) connectRoomWs(roomId); }, 3000);
+      setTimeout(() => { if (currentRoomId === roomId && !currentDmUserId) connectRoomWs(roomId); }, 3000);
+    });
+  }
+
+  // ── User/DM WebSocket (receives DMs from hub.broadcast_user) ─────────────
+  let _userWs = null;
+  function connectUserWs(dmUserId, dmUsername) {
+    // Use room WS slot for DM — re-use the global ws endpoint for DMs
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    // There is no dedicated user WS — DMs arrive via any open room WS.
+    // For DM-only mode we open a presence WS (ws/rooms/0 doesn't exist).
+    // Instead: enable input via REST fallback.
+    document.getElementById('msg-input').disabled = false;
+    document.getElementById('send-btn').disabled = false;
+    document.getElementById('msg-input').placeholder = `Message @${dmUsername}…`;
+    msgInput.init({
+      ws: null,
+      roomId: null,
+      onSendRest: async (content) => {
+        const res = await fetch(`/dms/${dmUserId}/messages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ content }),
+        });
+        if (res.ok) {
+          const msg = await res.json();
+          msgList.appendMessage(msg);
+        }
+      },
     });
   }
 
@@ -434,9 +719,6 @@
     document.getElementById('reply-label').textContent = '';
   });
 
-  // Override setReplyTo to show bar
-  const _origSetReply = msgInput.setReplyTo;
-  // Proxy not available for ESM in this simple way, hook via custom event instead
   document.addEventListener('reply:set', e => {
     document.getElementById('reply-label').textContent =
       `Replying to ${e.detail.sender_username}: ${e.detail.content.slice(0, 60)}`;
@@ -493,6 +775,9 @@
     document.getElementById('profile-overlay').classList.remove('open');
   });
   document.getElementById('close-btn').addEventListener('click', () => { location.href = 'login.html'; });
+  document.getElementById('sessions-btn').addEventListener('click', () => {
+    location.href = 'sessions.html';
+  });
   document.getElementById('logout-btn').addEventListener('click', async () => {
     await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
     location.href = 'login.html';

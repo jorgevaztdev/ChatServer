@@ -1,3 +1,5 @@
+import os
+import tempfile
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
@@ -7,7 +9,9 @@ from src.main import app
 from src.models.base import Base
 from src.api.deps import get_db
 
-_TEST_DB = "sqlite:///./test_chat.db"
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_TEST_DB_PATH = os.path.join(_HERE, "test_chat.db")
+_TEST_DB = f"sqlite:///{_TEST_DB_PATH}"
 _engine = create_engine(_TEST_DB, connect_args={"check_same_thread": False})
 
 
@@ -28,8 +32,22 @@ def _override_get_db():
 
 
 @pytest.fixture()
-def client():
-    from src.models import user, session, room, message, attachment, social  # noqa: F401
+def client(tmp_path):
+    import src.config as cfg
+    import src.api.files as files_api
+    import src.models.base as model_base
+
+    original_media = cfg.MEDIA_DIR
+    original_api   = files_api.MEDIA_DIR
+    original_engine = model_base.engine
+    original_session_local = model_base.SessionLocal
+
+    cfg.MEDIA_DIR       = str(tmp_path)
+    files_api.MEDIA_DIR = str(tmp_path)
+    model_base.engine        = _engine
+    model_base.SessionLocal  = _Session
+
+    from src.models import user, session, room, message, attachment, social, password_reset, unread  # noqa: F401
     from src.services.websocket_hub import hub
     Base.metadata.create_all(bind=_engine)
     app.dependency_overrides[get_db] = _override_get_db
@@ -37,11 +55,15 @@ def client():
         yield c
     app.dependency_overrides.clear()
     Base.metadata.drop_all(bind=_engine)
-    # Reset hub singleton between tests to prevent stale WS connections (ERR-001)
     hub._connections.clear()
     hub._room_users.clear()
     hub._activity.clear()
     hub._last_disconnect.clear()
+
+    cfg.MEDIA_DIR            = original_media
+    files_api.MEDIA_DIR      = original_api
+    model_base.engine        = original_engine
+    model_base.SessionLocal  = original_session_local
 
 
 @pytest.fixture()

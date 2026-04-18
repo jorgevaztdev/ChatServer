@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from src.api.deps import get_db, get_current_user
+from src.models.unread import UserRoomRead
 from src.models.user import User
 from src.models.room import Room, RoomMembership, RoomBan, RoomRole
 
@@ -146,6 +147,40 @@ def search_rooms(
         }
         for r in rooms
     ]
+
+
+# ── GET /rooms/unread — unread counts for current user's rooms ────────────────
+
+@router.get("/rooms/unread")
+def get_unread_counts(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    from src.models.message import Message
+
+    memberships = (
+        db.query(RoomMembership)
+        .filter(RoomMembership.user_id == current_user.id)
+        .all()
+    )
+    result = []
+    for m in memberships:
+        read_row = (
+            db.query(UserRoomRead)
+            .filter(
+                UserRoomRead.user_id == current_user.id,
+                UserRoomRead.room_id == m.room_id,
+            )
+            .first()
+        )
+        last_read_id = read_row.last_read_message_id if read_row else 0
+        unread_count = (
+            db.query(Message)
+            .filter(Message.room_id == m.room_id, Message.id > last_read_id)
+            .count()
+        )
+        result.append({"room_id": m.room_id, "unread_count": unread_count})
+    return result
 
 
 # ── T042: Join public room ────────────────────────────────────────────────────
@@ -298,6 +333,52 @@ async def delete_room(
 
     from src.services.websocket_hub import hub
     await hub.broadcast_room(room_id, {"type": "room:deleted", "payload": {"room_id": room_id}})
+
+
+# ── PUT /rooms/{id} — update room settings (owner only) ──────────────────────
+
+class RoomUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    is_private: bool | None = None
+
+
+@router.put("/rooms/{room_id}")
+def update_room(
+    room_id: int,
+    body: RoomUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    room = _get_room_or_404(room_id, db)
+    if room.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Owner only")
+
+    if body.name is not None and body.name != room.name:
+        conflict = db.query(Room).filter(Room.name == body.name, Room.id != room_id).first()
+        if conflict:
+            raise HTTPException(status_code=409, detail="Room name already taken")
+        room.name = body.name
+
+    if body.description is not None:
+        room.description = body.description
+
+    if body.is_private is not None:
+        room.is_private = body.is_private
+
+    db.commit()
+    db.refresh(room)
+
+    member_count = db.query(RoomMembership).filter(RoomMembership.room_id == room_id).count()
+    return {
+        "id": room.id,
+        "name": room.name,
+        "description": room.description,
+        "is_private": room.is_private,
+        "owner_id": room.owner_id,
+        "member_count": member_count,
+        "created_at": room.created_at.isoformat(),
+    }
 
 
 # ── GET /rooms/{id} — room detail ─────────────────────────────────────────────

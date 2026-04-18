@@ -8,6 +8,7 @@ from src.api.deps import get_db
 from src.models.session import UserSession
 from src.models.room import RoomMembership
 from src.models.message import Message
+from src.models.unread import UserRoomRead
 from src.models.user import User
 from src.services.auth import decode_jwt
 from src.services.websocket_hub import hub
@@ -106,6 +107,25 @@ async def ws_room(room_id: int, ws: WebSocket, db: Session = Depends(get_db)):
             })
 
     await ws.send_json({"type": "room:joined", "payload": {"room_id": room_id}})
+
+    # Auto-mark room as read on connect
+    latest_msg = (
+        db.query(Message)
+        .filter(Message.room_id == room_id)
+        .order_by(Message.id.desc())
+        .first()
+    )
+    latest_id = latest_msg.id if latest_msg else 0
+    read_row = (
+        db.query(UserRoomRead)
+        .filter(UserRoomRead.user_id == user_id, UserRoomRead.room_id == room_id)
+        .first()
+    )
+    if read_row:
+        read_row.last_read_message_id = latest_id
+    else:
+        db.add(UserRoomRead(user_id=user_id, room_id=room_id, last_read_message_id=latest_id))
+    db.commit()
 
     user = db.query(User).filter(User.id == user_id).first()
     username = user.username if user else "unknown"

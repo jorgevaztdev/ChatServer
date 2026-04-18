@@ -102,6 +102,34 @@ GET    /rooms/{id}/bans        List bans for room
 
 ---
 
+## Admin Setup
+
+> **Admin accounts can only be created or promoted via direct database access — there is no self-registration or UI signup path for admins.**
+
+To create or promote an admin user, run the script against the running database:
+
+```bash
+cd backend
+python create_admin.py
+```
+
+The script is hardcoded with a default admin account (`glitch` / `glitch@test.com`). Edit `create_admin.py` to change the credentials before first run.
+
+To promote an existing user manually via SQLite:
+
+```bash
+sqlite3 chat.db "UPDATE users SET is_admin = 1 WHERE username = 'your_username';"
+```
+
+Admin users get access to the **Admin Dashboard** at `/pages/admin-dashboard.html`, which provides:
+- User management: list, search, promote/demote admin, delete accounts
+- XMPP connection monitoring (C2S sessions)
+- Federation link monitoring (S2S)
+
+Non-admin users who navigate to the admin dashboard are redirected to the main chat.
+
+---
+
 ## Running Tests
 
 ```bash

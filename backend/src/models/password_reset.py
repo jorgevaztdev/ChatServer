@@ -3,12 +3,10 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from .base import Base
 
 
-class UserSession(Base):
-    __tablename__ = "user_sessions"
-
+class PasswordResetToken(Base):
+    __tablename__ = "password_reset_tokens"
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     token = Column(String, unique=True, nullable=False, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    user_agent = Column(String, nullable=True)
-    ip_address = Column(String, nullable=True)
+    expires_at = Column(DateTime, nullable=False)
+    used = Column(Integer, default=0, nullable=False)  # 0=unused, 1=used

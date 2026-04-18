@@ -1,7 +1,8 @@
 import os
 import uuid
+from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -9,6 +10,7 @@ from src.api.deps import get_db, get_current_user
 from src.config import MEDIA_DIR
 from src.models.attachment import Attachment
 from src.models.message import Message
+from src.models.password_reset import PasswordResetToken
 from src.models.room import Room, RoomBan, RoomMembership
 from src.models.session import UserSession
 from src.models.user import User
@@ -82,12 +84,17 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
 # ── T021: POST /auth/login ────────────────────────────────────────────────────
 
 @router.post("/login")
-def login(body: LoginRequest, response: Response, db: Session = Depends(get_db)):
+def login(body: LoginRequest, request: Request, response: Response, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == body.email).first()
     if not user or not verify_password(body.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     session_token = str(uuid.uuid4())
-    db.add(UserSession(user_id=user.id, token=session_token))
+    db.add(UserSession(
+        user_id=user.id,
+        token=session_token,
+        user_agent=request.headers.get("user-agent", ""),
+        ip_address=request.client.host if request.client else "",
+    ))
     db.commit()
     token = create_jwt({"user_id": user.id, "session_token": session_token})
     response.set_cookie(
@@ -146,3 +153,126 @@ def delete_account(
     db.delete(current_user)
     db.commit()
     response.delete_cookie(_COOKIE)
+
+
+# ── POST /auth/forgot-password ────────────────────────────────────────────────
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+
+@router.post("/forgot-password")
+def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == body.email).first()
+    if not user:
+        # Return generic response to prevent user enumeration
+        return {"reset_token": None, "detail": "If that email exists, a reset token was generated"}
+    reset_token = str(uuid.uuid4())
+    expires_at = datetime.utcnow() + timedelta(hours=1)
+    db.add(PasswordResetToken(user_id=user.id, token=reset_token, expires_at=expires_at))
+    db.commit()
+    return {"reset_token": reset_token}
+
+
+# ── POST /auth/reset-password ─────────────────────────────────────────────────
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+
+@router.post("/reset-password")
+def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
+    record = db.query(PasswordResetToken).filter(PasswordResetToken.token == body.token).first()
+    if not record:
+        raise HTTPException(status_code=400, detail="Invalid reset token")
+    if record.used:
+        raise HTTPException(status_code=400, detail="Token already used")
+    if record.expires_at < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="Token expired")
+    user = db.query(User).filter(User.id == record.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.password_hash = hash_password(body.new_password)
+    record.used = 1
+    db.commit()
+    return {"detail": "Password reset"}
+
+
+# ── PUT /auth/password ────────────────────────────────────────────────────────
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
+@router.put("/password")
+def change_password(
+    body: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not verify_password(body.current_password, current_user.password_hash):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    current_user.password_hash = hash_password(body.new_password)
+    db.commit()
+    return {"detail": "Password changed"}
+
+
+# ── GET /auth/sessions ────────────────────────────────────────────────────────
+
+@router.get("/sessions")
+def list_sessions(
+    access_token: str | None = Cookie(default=None),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    # Determine the current session token from cookie
+    current_session_token: str | None = None
+    if access_token:
+        payload = decode_jwt(access_token)
+        current_session_token = payload.get("session_token")
+
+    sessions = db.query(UserSession).filter(UserSession.user_id == current_user.id).all()
+    return [
+        {
+            "id": s.id,
+            "created_at": s.created_at.isoformat(),
+            "user_agent": s.user_agent,
+            "ip_address": s.ip_address,
+            "is_current": s.token == current_session_token,
+        }
+        for s in sessions
+    ]
+
+
+# ── DELETE /auth/sessions/{session_id} ───────────────────────────────────────
+
+@router.delete("/sessions/{session_id}", status_code=204)
+def delete_session(
+    session_id: int,
+    response: Response,
+    access_token: str | None = Cookie(default=None),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    session = (
+        db.query(UserSession)
+        .filter(UserSession.id == session_id, UserSession.user_id == current_user.id)
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    # Check if this is the current session
+    is_current = False
+    if access_token:
+        payload = decode_jwt(access_token)
+        current_session_token = payload.get("session_token")
+        is_current = session.token == current_session_token
+
+    db.delete(session)
+    db.commit()
+
+    if is_current:
+        response.delete_cookie(_COOKIE)

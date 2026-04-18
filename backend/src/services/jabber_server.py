@@ -571,17 +571,21 @@ async def _handle_s2s(reader: asyncio.StreamReader, writer: asyncio.StreamWriter
 
 async def start_jabber_server() -> None:
     """Start the XMPP C2S server on port 5222 and S2S server on port 5269."""
-    c2s_server = await asyncio.start_server(_handle_c2s, "0.0.0.0", 5222)
-    s2s_server = await asyncio.start_server(_handle_s2s, "0.0.0.0", 5269)
+    try:
+        c2s_server = await asyncio.start_server(_handle_c2s, "0.0.0.0", 5222)
+        addrs_c2s = ", ".join(str(s.getsockname()) for s in c2s_server.sockets)
+        logger.info("XMPP C2S server listening on %s", addrs_c2s)
+        asyncio.create_task(c2s_server.serve_forever())
+    except OSError as e:
+        logger.warning("XMPP C2S server could not bind (port 5222): %s", e)
 
-    addrs_c2s = ", ".join(str(s.getsockname()) for s in c2s_server.sockets)
-    addrs_s2s = ", ".join(str(s.getsockname()) for s in s2s_server.sockets)
-    logger.info("XMPP C2S server listening on %s", addrs_c2s)
-    logger.info("XMPP S2S server listening on %s", addrs_s2s)
-
-    # Serve forever in background
-    asyncio.create_task(c2s_server.serve_forever())
-    asyncio.create_task(s2s_server.serve_forever())
+    try:
+        s2s_server = await asyncio.start_server(_handle_s2s, "0.0.0.0", 5269)
+        addrs_s2s = ", ".join(str(s.getsockname()) for s in s2s_server.sockets)
+        logger.info("XMPP S2S server listening on %s", addrs_s2s)
+        asyncio.create_task(s2s_server.serve_forever())
+    except OSError as e:
+        logger.warning("XMPP S2S server could not bind (port 5269): %s", e)
 
 
 def get_c2s_sessions() -> list[dict]:
