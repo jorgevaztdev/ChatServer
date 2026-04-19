@@ -2,7 +2,7 @@
 import pytest
 
 
-def _login(client, email="room@test.com", password="pass123", username="roomuser"):
+def _login(client, email="room@test.com", password="pass1234", username="roomuser"):
     client.post("/auth/register", json={"email": email, "password": password, "username": username})
     client.post("/auth/login", json={"email": email, "password": password})
     return client.get("/auth/me").json()["id"]
@@ -65,7 +65,8 @@ def test_search_rooms(client):
     client.post("/rooms", json={"name": "rust-talk"})
     res = client.get("/rooms/search?q=python")
     assert res.status_code == 200
-    names = [r["name"] for r in res.json()]
+    data = res.json()
+    names = [r["name"] for r in data["results"]]
     assert "python-talk" in names
     assert "rust-talk" not in names
 
@@ -76,7 +77,7 @@ def test_search_rooms_empty_q_returns_all_public(client):
     client.post("/rooms", json={"name": "open-2"})
     res = client.get("/rooms/search?q=")
     assert res.status_code == 200
-    assert len(res.json()) >= 2
+    assert len(res.json()["results"]) >= 2
 
 
 # ── T042: Join public room ────────────────────────────────────────────────────

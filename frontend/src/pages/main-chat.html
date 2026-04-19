@@ -392,7 +392,8 @@
       item.dataset.dmUserId = f.user_id;
       const dot = document.createElement('span');
       dot.className = 'presence-dot';
-      dot.style.background = f.presence === 'online' ? '#008000' : '#808080';
+      dot.style.background = f.presence === 'online' ? '#008000' : (f.presence === 'AFK' ? '#FFD700' : '#808080');
+      dot.title = f.presence || 'offline';
       dot.style.flexShrink = '0';
       const name = document.createElement('span');
       name.textContent = f.username;
@@ -553,7 +554,9 @@
       item.style.cssText = 'position:relative;';
       const dot = document.createElement('span');
       dot.className = 'presence-dot';
-      dot.style.background = m.online ? '#008000' : '#808080';
+      const _presColor = m.presence_status === 'online' ? '#008000' : (m.presence_status === 'AFK' ? '#FFD700' : '#808080');
+      dot.style.background = _presColor;
+      dot.title = m.presence_status || (m.online ? 'online' : 'offline');
       const name = document.createElement('span');
       name.textContent = m.username + (m.role === 'admin' ? ' ★' : '');
       name.style.flex = '1';

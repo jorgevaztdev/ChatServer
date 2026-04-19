@@ -98,3 +98,42 @@ The extension bundles cross-platform scripts:
 - `scripts/bash/git-common.sh` — Shared Git utilities (Bash)
 - `scripts/powershell/create-new-feature.ps1` — PowerShell implementation
 - `scripts/powershell/git-common.ps1` — Shared Git utilities (PowerShell)
+
+## Gap Fixes Applied (2026-04-19)
+
+Post-review gap analysis against `2026_04_18_AI_herders_jam_-_requirements_v3.docx` identified and resolved the following:
+
+| Gap | File(s) Changed | Status |
+|-----|----------------|--------|
+| AFK presence color missing in member sidebar | `backend/src/api/rooms.py`, `frontend/src/pages/main-chat.html` | ✅ Fixed — `presence_status` now returned from `/rooms/{id}/members`; member sidebar and DM list show gold for AFK |
+| AFK presence color missing in DM list | `frontend/src/pages/main-chat.html` | ✅ Fixed — `f.presence === 'AFK'` maps to `#FFD700` |
+| Jabber C2S/S2S error tracking absent | `backend/src/services/jabber_server.py` | ✅ Fixed — `errors` counter on C2S sessions and S2S links; incremented on handler exceptions |
+| Admin dashboard: no auto-refresh for XMPP section | `frontend/src/pages/admin-dashboard.html` | ✅ Fixed — 10s polling when XMPP tab active; clears on tab switch |
+| Admin dashboard: no error count or uptime in Jabber view | `frontend/src/pages/admin-dashboard.html` | ✅ Fixed — error column in federation table; uptime (seconds) in C2S terminal |
+| Presence test coverage insufficient (no AFK/multi-tab/offline) | `backend/tests/integration/test_presence.py` | ✅ Fixed — 5 new tests: offline-after-disconnect, status string values, unknown user, AFK via stale activity, multi-tab aggregation |
+| Jabber federation load test missing | `backend/tests/load_test_federation.py` | ✅ Fixed — new script: 50 clients × 2 servers, concurrent, reports per-server and overall results |
+
+### Round 2 Gap Fixes (2026-04-19)
+
+Second review pass found additional gaps:
+
+| Gap | File(s) Changed | Status |
+|-----|----------------|--------|
+| No password length/format validation on register | `backend/src/api/auth.py` | ✅ Fixed — `RegisterRequest.password` requires `min_length=8`, email requires RFC pattern, username `1-32` chars alphanumeric |
+| No password min_length on change/reset endpoints | `backend/src/api/auth.py` | ✅ Fixed — `ChangePasswordRequest` and `ResetPasswordRequest.new_password` require `min_length=8` |
+| Room capacity limit (1000 members) not enforced | `backend/src/api/rooms.py` | ✅ Fixed — `join_room` and `invite_to_room` count members before inserting; 400 at ≥1000 |
+| Room search has no pagination (hard limit 50) | `backend/src/api/rooms.py`, `frontend/src/components/room-list.js`, `tests/load_test_ws.py`, `tests/load_test_federation.py` | ✅ Fixed — `/rooms/search` now accepts `offset`/`limit` params; returns `{total, offset, limit, results}`; frontend and load tests updated |
+
+### Round 3 Gap Fixes (2026-04-19)
+
+Third review pass and verification run identified and resolved the following:
+
+| Gap | File(s) Changed | Status |
+|-----|----------------|--------|
+| `Message.recipient_id` column absent from DB model | `backend/src/models/message.py` | ✅ Fixed — added `recipient_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True)` |
+| `send_dm` did not persist `recipient_id` on Message | `backend/src/services/messaging.py` | ✅ Fixed — `Message(recipient_id=recipient_id, ...)` now set; DM history queries now return correct results |
+| All integration test passwords too short after min_length=8 enforcement | `backend/tests/integration/` (all test files), `backend/tests/load_test_ws.py` | ✅ Fixed — passwords updated from `"pass123"` / `"pass"` / `"oldpass"` / `"newpass"` to 8+ char equivalents across all test files |
+| `test_search_rooms` expected array; got paginated dict | `backend/tests/integration/test_rooms.py` | ✅ Fixed — test now indexes `res.json()["results"]` |
+| `test_afk_status_on_heartbeat_with_stale_activity` used float timestamp; hub stores `datetime` | `backend/tests/integration/test_presence.py` | ✅ Fixed — backdated with `datetime.utcnow() - timedelta(seconds=61)` |
+
+**Final verification: 191/191 integration tests passing (2026-04-19).**

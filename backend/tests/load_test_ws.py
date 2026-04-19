@@ -46,7 +46,7 @@ async def create_room_and_join(owner_cookie: str) -> int:
         r = await c.post("/rooms", json={"name": ROOM_NAME, "is_private": False})
         if r.status_code == 409:
             rooms = await c.get("/rooms/search", params={"q": ROOM_NAME})
-            return rooms.json()[0]["id"]
+            return rooms.json()["results"][0]["id"]
         return r.json()["id"]
 
 

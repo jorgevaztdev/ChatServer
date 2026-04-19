@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from src.api.deps import get_db, get_current_user
@@ -30,9 +30,9 @@ def me(current_user: User = Depends(get_current_user)):
 
 
 class RegisterRequest(BaseModel):
-    email: str
-    password: str
-    username: str
+    email: str = Field(pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+    password: str = Field(min_length=8, max_length=128)
+    username: str = Field(min_length=1, max_length=32, pattern=r"^[A-Za-z0-9_-]+$")
 
 
 class LoginRequest(BaseModel):
@@ -178,7 +178,7 @@ def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
 
 class ResetPasswordRequest(BaseModel):
     token: str
-    new_password: str
+    new_password: str = Field(min_length=8, max_length=128)
 
 
 @router.post("/reset-password")
@@ -203,7 +203,7 @@ def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
 
 class ChangePasswordRequest(BaseModel):
     current_password: str
-    new_password: str
+    new_password: str = Field(min_length=8, max_length=128)
 
 
 @router.put("/password")

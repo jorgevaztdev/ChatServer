@@ -102,6 +102,7 @@ async def send_dm(
     msg = Message(
         room_id=None,
         sender_id=sender_id,
+        recipient_id=recipient_id,
         content=content,
         reply_to_id=reply_to_id,
         updated_at=datetime.utcnow(),

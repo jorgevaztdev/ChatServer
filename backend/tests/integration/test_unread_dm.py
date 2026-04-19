@@ -18,15 +18,15 @@ def _befriend(client, user_id):
 
 def _setup_friends(client):
     """Register alice + bob, make them friends, return (alice_id, bob_id)."""
-    alice = _mk(client, "alice@dm.com", "pass", "alice_dm")
-    bob = _mk(client, "bob@dm.com", "pass", "bob_dm")
+    alice = _mk(client, "alice@dm.com", "pass1234", "alice_dm")
+    bob = _mk(client, "bob@dm.com", "pass1234", "bob_dm")
 
     # Alice sends request to Bob by username
-    client.post("/auth/login", json={"email": "alice@dm.com", "password": "pass"})
+    client.post("/auth/login", json={"email": "alice@dm.com", "password": "pass1234"})
     client.post("/friends/request", json={"username": "bob_dm"})
 
     # Bob accepts using Alice's user_id
-    client.post("/auth/login", json={"email": "bob@dm.com", "password": "pass"})
+    client.post("/auth/login", json={"email": "bob@dm.com", "password": "pass1234"})
     client.post(f"/friends/accept/{alice['id']}")
 
     return alice["id"], bob["id"]
@@ -62,7 +62,7 @@ def test_dm_history_bidirectional(client):
     client.post(f"/dms/{alice_id}/messages", json={"content": "Hi from Bob"})
 
     # Alice sends to Bob
-    client.post("/auth/login", json={"email": "alice@dm.com", "password": "pass"})
+    client.post("/auth/login", json={"email": "alice@dm.com", "password": "pass1234"})
     client.post(f"/dms/{bob_id}/messages", json={"content": "Hi from Alice"})
 
     r = client.get(f"/dms/{bob_id}/messages")
@@ -99,7 +99,7 @@ def test_dm_history_limit_param(client):
 
 
 def test_dm_history_nonexistent_user_returns_404(client):
-    _mk(client, "alice2@dm.com", "pass", "alice_dm2")
+    _mk(client, "alice2@dm.com", "pass1234", "alice_dm2")
     r = client.get("/dms/99999/messages")
     assert r.status_code == 404
 
@@ -126,11 +126,11 @@ def test_dm_unread_increments_when_message_received(client):
     alice_id, bob_id = _setup_friends(client)
 
     # Alice sends Bob a message
-    client.post("/auth/login", json={"email": "alice@dm.com", "password": "pass"})
+    client.post("/auth/login", json={"email": "alice@dm.com", "password": "pass1234"})
     client.post(f"/dms/{bob_id}/messages", json={"content": "Hey Bob!"})
 
     # Bob checks unread
-    client.post("/auth/login", json={"email": "bob@dm.com", "password": "pass"})
+    client.post("/auth/login", json={"email": "bob@dm.com", "password": "pass1234"})
     r = client.get("/dms/unread")
     data = r.json()
     alice_entry = next(x for x in data if x["partner_id"] == alice_id)
@@ -141,12 +141,12 @@ def test_dm_unread_resets_after_mark_read(client):
     alice_id, bob_id = _setup_friends(client)
 
     # Alice sends 2 messages
-    client.post("/auth/login", json={"email": "alice@dm.com", "password": "pass"})
+    client.post("/auth/login", json={"email": "alice@dm.com", "password": "pass1234"})
     client.post(f"/dms/{bob_id}/messages", json={"content": "msg 1"})
     client.post(f"/dms/{bob_id}/messages", json={"content": "msg 2"})
 
     # Bob marks as read
-    client.post("/auth/login", json={"email": "bob@dm.com", "password": "pass"})
+    client.post("/auth/login", json={"email": "bob@dm.com", "password": "pass1234"})
     client.post(f"/dms/{alice_id}/read")
 
     r = client.get("/dms/unread")
@@ -184,7 +184,7 @@ def test_mark_dm_read_requires_auth(client):
 # ─── GET /rooms/unread ────────────────────────────────────────────────────────
 
 def test_room_unread_zero_for_member_with_no_messages(client):
-    _mk(client, "roomuser@test.com", "pass", "room_unread_user")
+    _mk(client, "roomuser@test.com", "pass1234", "room_unread_user")
     room = client.post("/rooms", json={"name": "unread-room", "is_private": False}).json()
     r = client.get("/rooms/unread")
     assert r.status_code == 200
@@ -195,7 +195,7 @@ def test_room_unread_zero_for_member_with_no_messages(client):
 
 
 def test_room_unread_increments_with_new_message(client):
-    _mk(client, "ru2@test.com", "pass", "ru2_user")
+    _mk(client, "ru2@test.com", "pass1234", "ru2_user")
     room = client.post("/rooms", json={"name": "unread-room2", "is_private": False}).json()
     client.post(f"/rooms/{room['id']}/messages", json={"content": "new msg"})
 
@@ -205,7 +205,7 @@ def test_room_unread_increments_with_new_message(client):
 
 
 def test_room_unread_resets_after_mark_read(client):
-    _mk(client, "ru3@test.com", "pass", "ru3_user")
+    _mk(client, "ru3@test.com", "pass1234", "ru3_user")
     room = client.post("/rooms", json={"name": "unread-room3", "is_private": False}).json()
     client.post(f"/rooms/{room['id']}/messages", json={"content": "hello"})
     client.post(f"/rooms/{room['id']}/messages", json={"content": "world"})
@@ -224,23 +224,23 @@ def test_room_unread_requires_auth(client):
 # ─── POST /rooms/{room_id}/read ───────────────────────────────────────────────
 
 def test_mark_room_read_returns_200(client):
-    _mk(client, "rmread@test.com", "pass", "rmread_user")
+    _mk(client, "rmread@test.com", "pass1234", "rmread_user")
     room = client.post("/rooms", json={"name": "markread-room", "is_private": False}).json()
     r = client.post(f"/rooms/{room['id']}/read")
     assert r.status_code == 200
 
 
 def test_mark_room_read_non_member_returns_403(client):
-    _mk(client, "rmread2@test.com", "pass", "rmread_user2")
+    _mk(client, "rmread2@test.com", "pass1234", "rmread_user2")
     room = client.post("/rooms", json={"name": "markread-room2", "is_private": False}).json()
 
-    _mk(client, "rmread3@test.com", "pass", "rmread_user3")
+    _mk(client, "rmread3@test.com", "pass1234", "rmread_user3")
     r = client.post(f"/rooms/{room['id']}/read")
     assert r.status_code == 403
 
 
 def test_mark_room_read_idempotent(client):
-    _mk(client, "rmread4@test.com", "pass", "rmread_user4")
+    _mk(client, "rmread4@test.com", "pass1234", "rmread_user4")
     room = client.post("/rooms", json={"name": "markread-room4", "is_private": False}).json()
     client.post(f"/rooms/{room['id']}/read")
     r = client.post(f"/rooms/{room['id']}/read")
@@ -250,7 +250,7 @@ def test_mark_room_read_idempotent(client):
 # ─── PUT /rooms/{room_id} ─────────────────────────────────────────────────────
 
 def test_update_room_name_by_owner(client):
-    _mk(client, "ruedit@test.com", "pass", "ruedit_user")
+    _mk(client, "ruedit@test.com", "pass1234", "ruedit_user")
     room = client.post("/rooms", json={"name": "old-name", "is_private": False}).json()
 
     r = client.put(f"/rooms/{room['id']}", json={"name": "new-name"})
@@ -259,7 +259,7 @@ def test_update_room_name_by_owner(client):
 
 
 def test_update_room_description_by_owner(client):
-    _mk(client, "ruedit2@test.com", "pass", "ruedit_user2")
+    _mk(client, "ruedit2@test.com", "pass1234", "ruedit_user2")
     room = client.post("/rooms", json={"name": "desc-room", "is_private": False}).json()
 
     r = client.put(f"/rooms/{room['id']}", json={"description": "a description"})
@@ -268,7 +268,7 @@ def test_update_room_description_by_owner(client):
 
 
 def test_update_room_privacy_by_owner(client):
-    _mk(client, "ruedit3@test.com", "pass", "ruedit_user3")
+    _mk(client, "ruedit3@test.com", "pass1234", "ruedit_user3")
     room = client.post("/rooms", json={"name": "pub-room", "is_private": False}).json()
 
     r = client.put(f"/rooms/{room['id']}", json={"is_private": True})
@@ -277,7 +277,7 @@ def test_update_room_privacy_by_owner(client):
 
 
 def test_update_room_name_conflict_returns_409(client):
-    _mk(client, "ruedit4@test.com", "pass", "ruedit_user4")
+    _mk(client, "ruedit4@test.com", "pass1234", "ruedit_user4")
     client.post("/rooms", json={"name": "taken-room", "is_private": False})
     room2 = client.post("/rooms", json={"name": "my-room", "is_private": False}).json()
 
@@ -286,10 +286,10 @@ def test_update_room_name_conflict_returns_409(client):
 
 
 def test_update_room_non_owner_returns_403(client):
-    _mk(client, "ruedit5@test.com", "pass", "ruedit_user5")
+    _mk(client, "ruedit5@test.com", "pass1234", "ruedit_user5")
     room = client.post("/rooms", json={"name": "owner-room", "is_private": False}).json()
 
-    _mk(client, "ruedit6@test.com", "pass", "ruedit_user6")
+    _mk(client, "ruedit6@test.com", "pass1234", "ruedit_user6")
     client.post(f"/rooms/{room['id']}/join")
     r = client.put(f"/rooms/{room['id']}", json={"name": "hijacked"})
     assert r.status_code == 403
@@ -303,7 +303,7 @@ def test_update_room_requires_auth(client):
 # ─── GET /rooms/{room_id} ─────────────────────────────────────────────────────
 
 def test_get_room_detail_returns_fields(client):
-    _mk(client, "getroom@test.com", "pass", "getroom_user")
+    _mk(client, "getroom@test.com", "pass1234", "getroom_user")
     room = client.post("/rooms", json={"name": "detail-room", "description": "desc here", "is_private": False}).json()
 
     r = client.get(f"/rooms/{room['id']}")
@@ -316,16 +316,16 @@ def test_get_room_detail_returns_fields(client):
 
 
 def test_get_room_detail_nonexistent_returns_404(client):
-    _mk(client, "getroom2@test.com", "pass", "getroom_user2")
+    _mk(client, "getroom2@test.com", "pass1234", "getroom_user2")
     r = client.get("/rooms/99999")
     assert r.status_code == 404
 
 
 def test_get_private_room_requires_membership(client):
-    _mk(client, "getroom3@test.com", "pass", "getroom_user3")
+    _mk(client, "getroom3@test.com", "pass1234", "getroom_user3")
     room = client.post("/rooms", json={"name": "priv-detail", "is_private": True}).json()
 
-    _mk(client, "getroom4@test.com", "pass", "getroom_user4")
+    _mk(client, "getroom4@test.com", "pass1234", "getroom_user4")
     r = client.get(f"/rooms/{room['id']}")
     assert r.status_code == 403
 

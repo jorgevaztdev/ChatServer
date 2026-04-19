@@ -126,27 +126,34 @@ def list_rooms(
 @router.get("/rooms/search")
 def search_rooms(
     q: str = Query(default=""),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    rooms = (
+    query = (
         db.query(Room)
         .filter(Room.is_private == False, Room.name.ilike(f"%{q}%"))  # noqa: E712
         .order_by(Room.name)
-        .limit(50)
-        .all()
     )
-    return [
-        {
-            "id": r.id,
-            "name": r.name,
-            "description": r.description,
-            "is_private": r.is_private,
-            "owner_id": r.owner_id,
-            "created_at": r.created_at.isoformat(),
-        }
-        for r in rooms
-    ]
+    total = query.count()
+    rooms = query.offset(offset).limit(limit).all()
+    return {
+        "total": total,
+        "offset": offset,
+        "limit": limit,
+        "results": [
+            {
+                "id": r.id,
+                "name": r.name,
+                "description": r.description,
+                "is_private": r.is_private,
+                "owner_id": r.owner_id,
+                "created_at": r.created_at.isoformat(),
+            }
+            for r in rooms
+        ],
+    }
 
 
 # ── GET /rooms/unread — unread counts for current user's rooms ────────────────
@@ -207,6 +214,10 @@ def join_room(
     if existing:
         return {"detail": "Already a member"}
 
+    member_count = db.query(RoomMembership).filter(RoomMembership.room_id == room_id).count()
+    if member_count >= 1000:
+        raise HTTPException(status_code=400, detail="Room is at capacity (1000 members)")
+
     db.add(RoomMembership(room_id=room_id, user_id=current_user.id, role=RoomRole.member))
     db.commit()
     return {"detail": "Joined"}
@@ -241,6 +252,10 @@ def invite_to_room(
     existing = _membership(room_id, target.id, db)
     if existing:
         return {"detail": "Already a member"}
+
+    member_count = db.query(RoomMembership).filter(RoomMembership.room_id == room_id).count()
+    if member_count >= 1000:
+        raise HTTPException(status_code=400, detail="Room is at capacity (1000 members)")
 
     db.add(RoomMembership(room_id=room_id, user_id=target.id, role=RoomRole.member))
     db.commit()
@@ -295,6 +310,7 @@ def list_members(
             "username": username,
             "role": m.role.value,
             "online": hub.is_online(m.user_id),
+            "presence_status": hub.get_presence_status(m.user_id),
         }
         for m, username in rows
     ]

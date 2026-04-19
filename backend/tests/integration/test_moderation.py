@@ -10,7 +10,7 @@ def _mk():
     return TestClient(app)
 
 
-def _setup(client, email, username, password="pass123"):
+def _setup(client, email, username, password="pass1234"):
     client.post("/auth/register", json={"email": email, "password": password, "username": username})
     client.post("/auth/login", json={"email": email, "password": password})
     return client.get("/auth/me").json()["id"]

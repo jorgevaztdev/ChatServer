@@ -69,6 +69,6 @@ def client(tmp_path):
 @pytest.fixture()
 def registered(client):
     """Return client with a registered + logged-in user."""
-    client.post("/auth/register", json={"email": "alice@test.com", "password": "pass123", "username": "alice"})
-    client.post("/auth/login", json={"email": "alice@test.com", "password": "pass123"})
+    client.post("/auth/register", json={"email": "alice@test.com", "password": "pass1234", "username": "alice"})
+    client.post("/auth/login", json={"email": "alice@test.com", "password": "pass1234"})
     return client

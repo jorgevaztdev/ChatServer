@@ -1,11 +1,11 @@
 """Integration tests for Phase 3 — US-AUTH."""
 
 
-def _reg(client, email="a@b.com", password="pass123", username="alice"):
+def _reg(client, email="a@b.com", password="pass1234", username="alice"):
     return client.post("/auth/register", json={"email": email, "password": password, "username": username})
 
 
-def _login(client, email="a@b.com", password="pass123"):
+def _login(client, email="a@b.com", password="pass1234"):
     return client.post("/auth/login", json={"email": email, "password": password})
 
 
@@ -91,7 +91,7 @@ def test_logout_only_current_session(client):
     from fastapi.testclient import TestClient
     from src.main import app
     client2 = TestClient(app)
-    client2.post("/auth/login", json={"email": "a@b.com", "password": "pass123"})
+    client2.post("/auth/login", json={"email": "a@b.com", "password": "pass1234"})
 
     # Logout session 1
     client.post("/auth/logout")

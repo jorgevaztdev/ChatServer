@@ -312,11 +312,14 @@ async def _relay_s2s(to_jid: str, sender_user: User, body: str) -> None:
                 "connected_at": datetime.utcnow().isoformat(),
                 "messages_in": 0,
                 "messages_out": 0,
+                "errors": 0,
             }
         _s2s_links[remote_domain]["messages_out"] += 1
         logger.info("S2S relayed message to %s", remote_domain)
     except Exception as e:
         logger.error("S2S relay failed for domain %s: %s", remote_domain, e)
+        if remote_domain in _s2s_links:
+            _s2s_links[remote_domain]["errors"] += 1
 
 
 # ── C2S handler ───────────────────────────────────────────────────────────────
@@ -430,6 +433,7 @@ async def _handle_c2s(reader: asyncio.StreamReader, writer: asyncio.StreamWriter
             "connected_at": datetime.utcnow().isoformat(),
             "messages_in": 0,
             "messages_out": 0,
+            "errors": 0,
         }
 
         logger.info("C2S session established: %s", jid)
@@ -468,6 +472,8 @@ async def _handle_c2s(reader: asyncio.StreamReader, writer: asyncio.StreamWriter
         logger.info("C2S stream ended: %s", peer)
     except Exception as e:
         logger.error("C2S handler error for %s: %s", peer, e)
+        if jid and jid in _c2s_sessions:
+            _c2s_sessions[jid]["errors"] += 1
     finally:
         if jid and jid in _c2s_sessions:
             del _c2s_sessions[jid]
@@ -505,6 +511,7 @@ async def _handle_s2s(reader: asyncio.StreamReader, writer: asyncio.StreamWriter
                 "connected_at": datetime.utcnow().isoformat(),
                 "messages_in": 0,
                 "messages_out": 0,
+                "errors": 0,
             }
 
         stream_id = str(uuid.uuid4())[:8]
@@ -557,6 +564,8 @@ async def _handle_s2s(reader: asyncio.StreamReader, writer: asyncio.StreamWriter
         logger.info("S2S stream ended: %s", peer)
     except Exception as e:
         logger.error("S2S handler error for %s: %s", peer, e)
+        if remote_domain and remote_domain in _s2s_links:
+            _s2s_links[remote_domain]["errors"] += 1
     finally:
         if remote_domain and remote_domain in _s2s_links:
             del _s2s_links[remote_domain]

@@ -12,8 +12,8 @@ def _login(client, email, password):
 
 
 def _setup_alice(client):
-    _reg(client, "alice@test.com", "pass123", "alice")
-    _login(client, "alice@test.com", "pass123")
+    _reg(client, "alice@test.com", "pass1234", "alice")
+    _login(client, "alice@test.com", "pass1234")
 
 
 def _setup_bob(client):
@@ -24,8 +24,8 @@ def _setup_bob(client):
 
     bob = TestClient(app)
     app.dependency_overrides[get_db] = _override_get_db
-    _reg(bob, "bob@test.com", "pass123", "bob")
-    _login(bob, "bob@test.com", "pass123")
+    _reg(bob, "bob@test.com", "pass1234", "bob")
+    _login(bob, "bob@test.com", "pass1234")
     return bob
 
 
@@ -33,7 +33,7 @@ def _setup_bob(client):
 
 def test_send_request_returns_201(client):
     _setup_alice(client)
-    _reg(client, "bob@test.com", "pass123", "bob")
+    _reg(client, "bob@test.com", "pass1234", "bob")
     res = client.post("/friends/request", json={"username": "bob"})
     assert res.status_code == 201
     data = res.json()
@@ -55,7 +55,7 @@ def test_send_request_to_self_returns_400(client):
 
 def test_send_duplicate_request_returns_409(client):
     _setup_alice(client)
-    _reg(client, "bob@test.com", "pass123", "bob")
+    _reg(client, "bob@test.com", "pass1234", "bob")
     client.post("/friends/request", json={"username": "bob"})
     res = client.post("/friends/request", json={"username": "bob"})
     assert res.status_code == 409
@@ -68,7 +68,7 @@ def test_send_request_requires_auth(client):
 
 def test_send_request_with_optional_message(client):
     _setup_alice(client)
-    _reg(client, "bob@test.com", "pass123", "bob")
+    _reg(client, "bob@test.com", "pass1234", "bob")
     res = client.post("/friends/request", json={"username": "bob", "message": "Hey!"})
     assert res.status_code == 201
 
@@ -77,7 +77,7 @@ def test_send_request_with_optional_message(client):
 
 def test_accept_request_returns_200(client):
     _setup_alice(client)
-    _reg(client, "bob@test.com", "pass123", "bob")
+    _reg(client, "bob@test.com", "pass1234", "bob")
     # Alice sends request to Bob
     client.post("/friends/request", json={"username": "bob"})
 
@@ -86,7 +86,7 @@ def test_accept_request_returns_200(client):
 
     # Switch to Bob
     client.post("/auth/logout")
-    _login(client, "bob@test.com", "pass123")
+    _login(client, "bob@test.com", "pass1234")
 
     res = client.post(f"/friends/accept/{alice_id}")
     assert res.status_code == 200
@@ -108,12 +108,12 @@ def test_accept_request_requires_auth(client):
 
 def test_remove_friend_returns_200(client):
     _setup_alice(client)
-    _reg(client, "bob@test.com", "pass123", "bob")
+    _reg(client, "bob@test.com", "pass1234", "bob")
     client.post("/friends/request", json={"username": "bob"})
     alice_id = client.get("/auth/me").json()["id"]
 
     client.post("/auth/logout")
-    _login(client, "bob@test.com", "pass123")
+    _login(client, "bob@test.com", "pass1234")
     client.post(f"/friends/accept/{alice_id}")
 
     res = client.delete(f"/friends/{alice_id}")
@@ -130,15 +130,15 @@ def test_remove_nonexistent_friend_returns_404(client):
 def test_remove_pending_request_returns_404(client):
     """Cannot use DELETE /friends/{id} on a pending request — use decline instead."""
     _setup_alice(client)
-    _reg(client, "bob@test.com", "pass123", "bob")
+    _reg(client, "bob@test.com", "pass1234", "bob")
     client.post("/friends/request", json={"username": "bob"})
     bob_id_res = client.post("/auth/logout")
 
-    _login(client, "bob@test.com", "pass123")
+    _login(client, "bob@test.com", "pass1234")
     bob_id = client.get("/auth/me").json()["id"]
 
     client.post("/auth/logout")
-    _login(client, "alice@test.com", "pass123")
+    _login(client, "alice@test.com", "pass1234")
 
     res = client.delete(f"/friends/{bob_id}")
     assert res.status_code == 404
@@ -153,12 +153,12 @@ def test_remove_friend_requires_auth(client):
 
 def test_decline_request_returns_200(client):
     _setup_alice(client)
-    _reg(client, "bob@test.com", "pass123", "bob")
+    _reg(client, "bob@test.com", "pass1234", "bob")
     client.post("/friends/request", json={"username": "bob"})
     alice_id = client.get("/auth/me").json()["id"]
 
     client.post("/auth/logout")
-    _login(client, "bob@test.com", "pass123")
+    _login(client, "bob@test.com", "pass1234")
     res = client.delete(f"/friends/decline/{alice_id}")
     assert res.status_code == 200
 
@@ -180,12 +180,12 @@ def test_list_friends_empty_returns_200(client):
 
 def test_list_friends_shows_accepted_friend(client):
     _setup_alice(client)
-    _reg(client, "bob@test.com", "pass123", "bob")
+    _reg(client, "bob@test.com", "pass1234", "bob")
     client.post("/friends/request", json={"username": "bob"})
     alice_id = client.get("/auth/me").json()["id"]
 
     client.post("/auth/logout")
-    _login(client, "bob@test.com", "pass123")
+    _login(client, "bob@test.com", "pass1234")
     client.post(f"/friends/accept/{alice_id}")
 
     friends = client.get("/friends").json()
@@ -197,30 +197,30 @@ def test_list_friends_shows_accepted_friend(client):
 def test_list_friends_bidirectional(client):
     """Both alice and bob see each other after accept."""
     _setup_alice(client)
-    _reg(client, "bob@test.com", "pass123", "bob")
+    _reg(client, "bob@test.com", "pass1234", "bob")
     client.post("/friends/request", json={"username": "bob"})
     alice_id = client.get("/auth/me").json()["id"]
 
     client.post("/auth/logout")
-    _login(client, "bob@test.com", "pass123")
+    _login(client, "bob@test.com", "pass1234")
     client.post(f"/friends/accept/{alice_id}")
     bob_friends = client.get("/friends").json()
     assert any(f["username"] == "alice" for f in bob_friends)
 
     client.post("/auth/logout")
-    _login(client, "alice@test.com", "pass123")
+    _login(client, "alice@test.com", "pass1234")
     alice_friends = client.get("/friends").json()
     assert any(f["username"] == "bob" for f in alice_friends)
 
 
 def test_list_friends_not_shown_after_remove(client):
     _setup_alice(client)
-    _reg(client, "bob@test.com", "pass123", "bob")
+    _reg(client, "bob@test.com", "pass1234", "bob")
     client.post("/friends/request", json={"username": "bob"})
     alice_id = client.get("/auth/me").json()["id"]
 
     client.post("/auth/logout")
-    _login(client, "bob@test.com", "pass123")
+    _login(client, "bob@test.com", "pass1234")
     client.post(f"/friends/accept/{alice_id}")
 
     client.delete(f"/friends/{alice_id}")
@@ -236,7 +236,7 @@ def test_list_friends_requires_auth(client):
 def test_list_friends_pending_not_shown(client):
     """Pending request not shown in friends list."""
     _setup_alice(client)
-    _reg(client, "bob@test.com", "pass123", "bob")
+    _reg(client, "bob@test.com", "pass1234", "bob")
     client.post("/friends/request", json={"username": "bob"})
 
     friends = client.get("/friends").json()
@@ -254,12 +254,12 @@ def test_list_requests_empty_returns_200(client):
 
 def test_list_requests_shows_pending_incoming(client):
     _setup_alice(client)
-    _reg(client, "bob@test.com", "pass123", "bob")
+    _reg(client, "bob@test.com", "pass1234", "bob")
     client.post("/friends/request", json={"username": "bob"})
     alice_id = client.get("/auth/me").json()["id"]
 
     client.post("/auth/logout")
-    _login(client, "bob@test.com", "pass123")
+    _login(client, "bob@test.com", "pass1234")
 
     reqs = client.get("/friends/requests").json()
     assert len(reqs) == 1
@@ -270,7 +270,7 @@ def test_list_requests_shows_pending_incoming(client):
 def test_list_requests_not_shown_for_requester(client):
     """Sender does NOT see own outgoing request in /friends/requests."""
     _setup_alice(client)
-    _reg(client, "bob@test.com", "pass123", "bob")
+    _reg(client, "bob@test.com", "pass1234", "bob")
     client.post("/friends/request", json={"username": "bob"})
 
     reqs = client.get("/friends/requests").json()
@@ -279,12 +279,12 @@ def test_list_requests_not_shown_for_requester(client):
 
 def test_list_requests_cleared_after_accept(client):
     _setup_alice(client)
-    _reg(client, "bob@test.com", "pass123", "bob")
+    _reg(client, "bob@test.com", "pass1234", "bob")
     client.post("/friends/request", json={"username": "bob"})
     alice_id = client.get("/auth/me").json()["id"]
 
     client.post("/auth/logout")
-    _login(client, "bob@test.com", "pass123")
+    _login(client, "bob@test.com", "pass1234")
     client.post(f"/friends/accept/{alice_id}")
 
     reqs = client.get("/friends/requests").json()
@@ -293,12 +293,12 @@ def test_list_requests_cleared_after_accept(client):
 
 def test_list_requests_cleared_after_decline(client):
     _setup_alice(client)
-    _reg(client, "bob@test.com", "pass123", "bob")
+    _reg(client, "bob@test.com", "pass1234", "bob")
     client.post("/friends/request", json={"username": "bob"})
     alice_id = client.get("/auth/me").json()["id"]
 
     client.post("/auth/logout")
-    _login(client, "bob@test.com", "pass123")
+    _login(client, "bob@test.com", "pass1234")
     client.delete(f"/friends/decline/{alice_id}")
 
     reqs = client.get("/friends/requests").json()

@@ -74,10 +74,13 @@ async function search(q) {
     _status().textContent = 'Search failed.';
     return;
   }
-  const rooms = await res.json();
+  const data = await res.json();
+  // /rooms/search returns {total, results:[...]}; /rooms returns array
+  const rooms = Array.isArray(data) ? data : (data.results ?? []);
+  const total = Array.isArray(data) ? rooms.length : (data.total ?? rooms.length);
   _render(rooms);
   _status().textContent = q
-    ? `${rooms.length} result${rooms.length === 1 ? '' : 's'} for "${q}"`
+    ? `${total} result${total === 1 ? '' : 's'} for "${q}"`
     : `${rooms.length} public room${rooms.length === 1 ? '' : 's'} available`;
 }
 

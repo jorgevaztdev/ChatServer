@@ -273,6 +273,7 @@
                   <th class="p-1 border-r border-gray-300 font-normal">Domain</th>
                   <th class="p-1 border-r border-gray-300 font-normal">Msg In</th>
                   <th class="p-1 border-r border-gray-300 font-normal">Msg Out</th>
+                  <th class="p-1 border-r border-gray-300 font-normal text-red-700">Errors</th>
                   <th class="p-1 font-normal">Connected At</th>
                 </tr>
               </thead>
@@ -323,6 +324,7 @@
   let _users = [];
   let _selectedId = null;
   let _currentUserId = null;
+  let _xmppRefreshTimer = null;
 
   // ── Auth guard ────────────────────────────────────────────────────────────
   async function init() {
@@ -350,7 +352,14 @@
     });
     document.getElementById('section-' + name).classList.remove('hidden');
     btn.className = btn.className.replace('nav-inactive','nav-active');
-    if (name === 'jabber') loadXmpp();
+    if (name === 'jabber') {
+      loadXmpp();
+      clearInterval(_xmppRefreshTimer);
+      _xmppRefreshTimer = setInterval(loadXmpp, 10000);
+    } else {
+      clearInterval(_xmppRefreshTimer);
+      _xmppRefreshTimer = null;
+    }
     if (name === 'rooms') loadRooms();
   }
 
@@ -510,8 +519,13 @@
         if (!conns.length) {
           term.innerHTML = '<div>[SYSTEM] No active C2S connections.</div><div class="animate-pulse">_</div>';
         } else {
+          const now = Date.now();
           term.innerHTML = '<div>[SYSTEM] Jabber C2S Active Sessions:</div>' +
-            conns.map(c => `<div>[C2S] ${c.jid} — in:${c.messages_in} out:${c.messages_out}</div>`).join('') +
+            conns.map(c => {
+              const uptimeSec = c.connected_at ? Math.round((now - new Date(c.connected_at).getTime()) / 1000) : 0;
+              const errPart = c.errors > 0 ? ` <span style="color:#ff4444">err:${c.errors}</span>` : '';
+              return `<div>[C2S] ${esc(c.jid)} — in:${c.messages_in} out:${c.messages_out}${errPart} up:${uptimeSec}s</div>`;
+            }).join('') +
             '<div class="animate-pulse mt-1">_</div>';
         }
       }
@@ -528,6 +542,7 @@
               <td class="p-1 border-r border-gray-200 mono">${esc(f.domain)}</td>
               <td class="p-1 border-r border-gray-200 text-center">${f.messages_in}</td>
               <td class="p-1 border-r border-gray-200 text-center">${f.messages_out}</td>
+              <td class="p-1 border-r border-gray-200 text-center ${f.errors > 0 ? 'text-red-700 font-bold' : ''}">${f.errors ?? 0}</td>
               <td class="p-1 mono text-[10px]">${f.connected_at ? new Date(f.connected_at).toLocaleTimeString() : '—'}</td>
             </tr>`).join('');
         }
